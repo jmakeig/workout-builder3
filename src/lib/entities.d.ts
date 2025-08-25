@@ -1,4 +1,4 @@
-type ID = string & { __brand: 'Identifier' };
+type ID = string & { readonly __brand: 'Identifier' };
 
 /**
  * Top-level entity. A workout is made of of ordered sets. 
