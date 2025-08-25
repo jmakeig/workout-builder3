@@ -1,26 +1,23 @@
 import { fail } from '@sveltejs/kit';
 
+/**
+ * @template T
+ * @typedef {import('$lib/util').FormInput<T>} FormInput
+ */
+/** @typedef {import('$lib/entities').Exercise} Exercise */
+
+/** @type {FormInput<Exercise>} */
+
 /** @type {import('./$types').PageServerLoad} */
 export async function load() {
     return {};
 };
 
-/**
- * @param {FormData} form_data
- * @param {string} name
- * @returns {string | null}
- */
-function get_string(form_data, name) {
-    const fde = form_data.get(name);
-    if (null === fde) return null;
-    return String(fde);
-}
-
 /** @satisfies {import('./$types').Actions} */
 export const actions = {
     create: async ({ request }) => {
         const form_data = await request.formData();
-        /** @type {import('$lib/util').FormInput<import('$lib/entities').Exercise>} */
+        /** @type {FormInput<Exercise>} */
         const exercise = {
             name: form_data.get('name'),
             label: form_data.get('label'),
