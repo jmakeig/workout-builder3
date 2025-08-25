@@ -7,23 +7,24 @@
 
 	/** @type {FormInput<Exercise>} */
 
-	/** @type {import('./$types').PageProps} */
+	/** @type {{ data: import('./$types').PageData, form: import('./$types').ActionData }} */
 	let { data, form } = $props();
-
-	console.log(form);
 </script>
 
 <h1>Create New Exercise</h1>
 
+{#if form?.validations}
+	<p>Oops!</p>
+{/if}
 <form method="post" action="?/create">
 	<div>
 		<label for="name">Name</label>
-		<input type="text" name="name" value={form?.exercise.name} required />
+		<input type="text" name="name" value={form?.exercise.name} />
 	</div>
 
 	<div>
 		<label for="label">Label</label>
-		<input type="text" name="label" value={form?.exercise.label} required />
+		<input type="text" name="label" value={form?.exercise.label} />
 	</div>
 
 	<div>

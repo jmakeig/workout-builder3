@@ -1,10 +1,16 @@
 import { fail } from '@sveltejs/kit';
 
 /**
- * @template T
- * @typedef {import('$lib/util').FormInput<T>} FormInput
+ * @template Entity
+ * @typedef {import('$lib/util').FormInput<Entity>} FormInput
  */
+/**
+ * @template Entity 
+ * @typedef {import('$lib/util').Validation<Entity>} Validation
+*/
+
 /** @typedef {import('$lib/entities').Exercise} Exercise */
+
 
 /** @type {FormInput<Exercise>} */
 
@@ -25,7 +31,15 @@ export const actions = {
             instructions: form_data.get('instructions'),
             alternatives: null
         };
-        console.log('presubmit', exercise);
-        return fail(400, { exercise });
+        /** @type {Validation<FormInput<Exercise>>[]} */
+        const validations = [];
+        if ('' === exercise.label) {
+            validations.push({
+                message: 'Label is required',
+                for: 'label'
+            });
+        }
+        if (validations.length) return fail(400, { exercise, validations });
+        return { exercise };
     }
 };
