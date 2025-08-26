@@ -37,7 +37,7 @@ function exists(value) {
 export async function create_exercise(input) {
 	/** @type {Validation<Exercise>[]} */
 	const validations = [];
-	console.log('create_exercise', input);
+	
 	if (!exists(input.name)) validations.push({ message: 'Name is required', for: 'name' });
 	if (!exists(input.label)) validations.push({ message: 'Label is required', for: 'label' });
 
