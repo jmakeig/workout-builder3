@@ -12,25 +12,17 @@ import { fail } from '@sveltejs/kit';
 /** @typedef {import('$lib/entities').Exercise} Exercise */
 
 
-/** @type {FormInput<Exercise>} */
-
 /** @type {import('./$types').PageServerLoad} */
 export async function load() {
     return {};
 };
 
+
 /** @satisfies {import('./$types').Actions} */
 export const actions = {
     create: async ({ request }) => {
-        const form_data = await request.formData();
-        /** @type {FormInput<Exercise>} */
-        const exercise = {
-            name: form_data.get('name'),
-            label: form_data.get('label'),
-            description: form_data.get('description'),
-            instructions: form_data.get('instructions'),
-            alternatives: null
-        };
+        const exercise = /** @type {FormInput<Exercise>} */ (Object.fromEntries(await request.formData()));
+        console.log(exercise);
         /** @type {Validation<FormInput<Exercise>>[]} */
         const validations = [];
         if ('' === exercise.label) {
