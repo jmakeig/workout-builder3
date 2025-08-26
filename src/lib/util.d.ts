@@ -1,5 +1,5 @@
 export type FormInput<T> = {
-    [p in keyof T]: T[p] | null | string | FormDataEntryValue;
+    [p in keyof T]: T[p] | null | string; // | FormDataEntryValue
 }
 
 /**
@@ -39,4 +39,26 @@ type Forable<Entity> = `${string & keyof Entity}` | `${string & keyof PickMatch<
 export type Validation<T = unknown> = {
     message: string | AtLeastOne<{ [K in Locale]: string }>
     'for'?: Forable<T>;
+};
+
+/**
+ * A response to an API call. A response can either be the plain output entity, `Out`,
+ * or a validation error wrapper around the input, `In`, plus a collection of `Validation`
+ * instances. `Prop` allows you to
+ * name the property on the `InvalidResult` instance to access the input entity,
+ * e.g. `result.customer` versus the default, `result.input`.
+ *
+ * This means that APIs should *not* throw `Error`s for business rule violations.
+ * Validation is an expected part of the API contract and thus is modeled in the
+ * responses from API calls. Thrown errors should represent exceptional circumstances.
+ */
+export type Result<In, Out, Prop extends string = 'input'> = Out | InvalidResult<In, Out, Prop>;
+
+/**
+ * A way to communicate a business rule violation in an API call.
+ */
+export type InvalidResult<In, Out, Prop extends string = 'input'> = {
+    validations: Array<Validation<Out>>;
+} & {
+    [property in Prop]: In;
 };

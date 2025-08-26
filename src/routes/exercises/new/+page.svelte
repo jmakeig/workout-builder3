@@ -1,12 +1,4 @@
 <script>
-	/**
-	 * @template T
-	 * @typedef {import('$lib/util').FormInput<T>} FormInput
-	 */
-	/** @typedef {import('$lib/entities').Exercise} Exercise */
-
-	/** @type {FormInput<Exercise>} */
-
 	/** @type {{ data: import('./$types').PageData, form: import('./$types').ActionData }} */
 	let { data, form } = $props();
 </script>
@@ -14,8 +6,12 @@
 <h1>Create New Exercise</h1>
 
 {#if form?.validations}
-	<p>Oops!</p>
+	<p>{form.validations[0].message}</p>
+{:else if form}
+	<p>Success!</p>
+	<pre>{JSON.stringify(form.exercise, null, 2)}</pre>
 {/if}
+
 <form method="post" action="?/create">
 	<div>
 		<label for="name">Name</label>
