@@ -25,6 +25,7 @@ const exercises = [];
 function exists(value) {
 	if (undefined === value || null === value) return false;
 	if ('string' === typeof value) return '' !== value;
+	if ('number' === typeof value) return !Number.isNaN(value);
 	return true;
 }
 
