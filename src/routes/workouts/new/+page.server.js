@@ -1,5 +1,6 @@
-import * as api from '$lib/server/api';
 import { fail } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
+import * as api from '$lib/server/api';
 import { is_invalid } from '$lib/validation';
 
 /** @typedef {import('$lib/entities').Workout} Workout */
@@ -22,6 +23,7 @@ export const actions = {
 		// Careful with the params. The message sent back in the `form` or the `fail`
 		// needs to be an object with an `exercise` property (well, `Prop`).
 		if (is_invalid(workout)) return fail(400, workout);
-		return { workout };
+		//return { workout };
+		return redirect(303, `/workouts/${workout.label}/sets`);
 	}
 };

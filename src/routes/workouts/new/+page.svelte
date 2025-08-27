@@ -28,11 +28,6 @@
 		<textarea id="description" name="description">{form?.workout.description}</textarea>
 	</div>
 
-	<div>
-		<label for="sets">Sets:</label>
-		<textarea id="sets" name="sets">{form?.workout.sets}</textarea>
-	</div>
-
 	<div class="buttons">
 		<button type="submit">Save</button>
 		<button>Cancel</button>

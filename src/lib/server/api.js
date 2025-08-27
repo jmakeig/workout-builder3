@@ -45,7 +45,7 @@ export async function create_exercise(input) {
 	if (validations.length > 0) {
 		return Promise.resolve({ exercise: input, validations });
 	}
-	const exercise = /** @type {Exercise} */ ({ exercise: crypto.randomUUID(), ...input });
+	const exercise = /** @type {Exercise} */ ({ ...input, exercise: crypto.randomUUID() });
 	exercises.push(exercise);
 	return Promise.resolve(exercise);
 }
@@ -64,7 +64,21 @@ export async function create_workout(input) {
 	if (validations.length > 0) {
 		return Promise.resolve({ workout: input, validations });
 	}
-	const workout = /** @type {Workout} */ ({ workout: crypto.randomUUID(), ...input });
+	const workout = /** @type {Workout} */ ({
+		...input,
+		workout: crypto.randomUUID(),
+		sets: input.sets || [] // Assumes that the initial creation does not set this
+	});
 	workouts.push(workout);
 	return Promise.resolve(workout);
+}
+
+/**
+ *
+ * @param {Workout['label']} label
+ * @returns {Promise<Workout | null>}
+ */
+export async function find_workout(label) {
+	const result = workouts.find((workout) => workout.label === label);
+	return Promise.resolve(result || null);
 }
