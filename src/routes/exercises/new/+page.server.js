@@ -3,10 +3,7 @@ import { fail } from '@sveltejs/kit';
 import { is_invalid } from '$lib/validation';
 
 /** @typedef {import('$lib/entities').Exercise} Exercise */
-/**
- * @template Entity
- * @typedef {import('$lib/util').FormInput<Entity>} FormInput
- */
+/** @typedef {import('$lib/entities').PendingExercise} PendingExercise */
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load() {
@@ -16,7 +13,7 @@ export async function load() {
 /** @satisfies {import('./$types').Actions} */
 export const actions = {
 	create: async ({ request }) => {
-		const exercise_input = /** @type {FormInput<Exercise>} */ (
+		const exercise_input = /** @type {PendingExercise} */ (
 			Object.fromEntries(await request.formData())
 		);
 

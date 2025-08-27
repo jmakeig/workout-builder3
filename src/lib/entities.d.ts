@@ -1,10 +1,12 @@
+import type { OmitMatch, Loosen } from './util';
+
 type ID = string & { readonly __brand: 'Identifier' };
 
 /**
  * Top-level entity. A workout is made of of ordered sets.
  */
 export type Workout = {
-	id: ID;
+	workout: ID;
 	name: string;
 	label: string;
 	description: string;
@@ -21,6 +23,7 @@ type Activity = {
 };
 
 export type Exercise = {
+	exercise: ID;
 	name: string;
 	label: string;
 	description: string | null;
@@ -31,3 +34,5 @@ export type Exercise = {
 export type Rest = Activity & {
 	readonly activity: 'rest';
 };
+
+export type PendingExercise = Loosen<OmitMatch<Exercise, ID>>;

@@ -3,6 +3,23 @@ export type FormInput<T> = {
 };
 
 /**
+ * Allow all properties in `T` to be `null` or `string` along with the property’s original type.
+ * This is useful when you populate an entity from `FormData`, for example,
+ * which returns `string` or `null` (or `File`). You’d populate a “loose” instance of the entity,
+ * submit it for processing, and get back the strongly typed kind, or validation errors.
+ */
+export type Loosen<T> = {
+	[p in keyof T]: T[p] | null | string;
+};
+
+/**
+ * For the properties in `T`, ignore the ones that match `U` by types.
+ */
+export type OmitMatch<Type, Union> = {
+	[K in keyof Type as Type[K] extends Union ? never : K]: Type[K];
+};
+
+/**
  * Like `Pick`, but matches on property type rather than key name.
  *
  * @example

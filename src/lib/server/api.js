@@ -1,10 +1,7 @@
 //import crypto from 'crypto';
 
 /** @typedef {import('$lib/entities').Exercise} Exercise */
-/**
- * @template Entity
- * @typedef {import('$lib/util').FormInput<Entity>} FormInput
- */
+/** @typedef {import('$lib/entities').PendingExercise} PendingExercise */
 /**
  * @template Entity
  * @typedef {import('$lib/util').Validation<Entity>} Validation
@@ -18,8 +15,7 @@
 const exercises = [];
 
 /**
- * @template Entity
- * @param {Entity[keyof Entity]} value
+ * @param {any} value
  * @returns {boolean}
  */
 function exists(value) {
@@ -31,20 +27,20 @@ function exists(value) {
 
 /**
  *
- * @param {FormInput<Exercise>} input
- * @returns {Promise<Result<FormInput<Exercise>, Exercise, 'exercise'>>}
+ * @param {PendingExercise} input
+ * @returns {Promise<Result<PendingExercise, Exercise, 'exercise'>>}
  */
 export async function create_exercise(input) {
 	/** @type {Validation<Exercise>[]} */
 	const validations = [];
-	
+
 	if (!exists(input.name)) validations.push({ message: 'Name is required', for: 'name' });
 	if (!exists(input.label)) validations.push({ message: 'Label is required', for: 'label' });
 
 	if (validations.length > 0) {
 		return Promise.resolve({ exercise: input, validations });
 	}
-	const exercise = /** @type {Exercise} */ ({ id: crypto.randomUUID(), ...input });
+	const exercise = /** @type {Exercise} */ ({ exercise: crypto.randomUUID(), ...input });
 	exercises.push(exercise);
 	return Promise.resolve(exercise);
 }
