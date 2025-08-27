@@ -24,6 +24,6 @@ export const actions = {
 		// needs to be an object with an `exercise` property (well, `Prop`).
 		if (is_invalid(workout)) return fail(400, workout);
 		//return { workout };
-		return redirect(303, `/workouts/${workout.label}/sets`);
+		return redirect(303, `/workouts/${workout.label}`);
 	}
 };

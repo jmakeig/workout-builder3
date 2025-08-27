@@ -3,4 +3,6 @@
 	let { data } = $props();
 </script>
 
-{data.workload_label}
+{data.label}
+
+<pre>{JSON.stringify(data.workout, null, 2)}</pre>
