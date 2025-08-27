@@ -1,6 +1,13 @@
-import type { OmitMatch, Loosen } from './util';
+import type { Loosen } from './util';
 
-type ID = string & { readonly __brand: 'Identifier' };
+declare const IDBrand: unique symbol;
+/**
+ * Need to remembrer to use a type assertion. 
+ * This is not a normal string.
+ * 
+ * @example const id = @type {ID} ('string')
+ */
+type ID = string & { [IDBrand]: void };
 
 /**
  * Top-level entity. A workout is made of of ordered sets.
@@ -13,14 +20,16 @@ export type Workout = {
 	sets: Set[];
 };
 
-export type Set = Array<{
-	activity: (Activity & Exercise & { readonly type: 'exercise' }) | Rest;
-	duration: number; // in seconds
-}>;
-
-type Activity = {
-	readonly activity: string;
-};
+export type Set = Array<
+	(
+		| {
+				exercise: Exercise;
+		  }
+		| {
+				rest: Rest;
+		  }
+	) & { duration: number }
+>;
 
 export type Exercise = {
 	exercise: ID;
@@ -31,8 +40,8 @@ export type Exercise = {
 	alternatives: Array<Exercise> | null;
 };
 
-export type Rest = Activity & {
-	readonly activity: 'rest';
+type Rest = {
+	instructions: string | null;
 };
 
 export type PendingWorkout = Loosen<Workout>;
