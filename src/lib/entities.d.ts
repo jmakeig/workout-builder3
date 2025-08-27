@@ -35,4 +35,5 @@ export type Rest = Activity & {
 	readonly activity: 'rest';
 };
 
+export type PendingWorkout = Loosen<OmitMatch<Workout, ID>>;
 export type PendingExercise = Loosen<OmitMatch<Exercise, ID>>;
