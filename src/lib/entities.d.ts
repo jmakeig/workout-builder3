@@ -2,9 +2,9 @@ import type { Loosen } from './util';
 
 declare const IDBrand: unique symbol;
 /**
- * Need to remembrer to use a type assertion. 
+ * Need to remembrer to use a type assertion.
  * This is not a normal string.
- * 
+ *
  * @example const id = @type {ID} ('string')
  */
 type ID = string & { [IDBrand]: void };
@@ -20,16 +20,16 @@ export type Workout = {
 	sets: Set[];
 };
 
-export type Set = Array<
-	(
-		| {
-				exercise: Exercise;
-		  }
-		| {
-				rest: Rest;
-		  }
-	) & { duration: number }
->;
+export type Set = Array<Activity>;
+
+export type Activity = (
+	| {
+			exercise: Exercise;
+	  }
+	| {
+			rest: Rest;
+	  }
+) & { duration: number };
 
 export type Exercise = {
 	exercise: ID;
@@ -44,5 +44,18 @@ type Rest = {
 	instructions: string | null;
 };
 
-export type PendingWorkout = Loosen<Workout>;
-export type PendingExercise = Loosen<Exercise>;
+export type PendingWorkout = Workout | Loosen<Workout>;
+export type PendingExercise = Exercise | Loosen<Exercise>;
+export type PendingRest = Rest | Loosen<Rest>;
+export type PendingActivity =
+	| Activity
+	| ((
+			| {
+					exercise: PendingExercise;
+			  }
+			| {
+					rest: PendingRest;
+			  }
+	  ) &
+			Loosen<{ duration: number }>);
+export type PendingSet = Set | Array<PendingActivity>;
