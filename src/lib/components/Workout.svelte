@@ -6,7 +6,7 @@
 	/** @typedef {import('$lib/entities').PendingExercise} PendingExercise */
 	/** @typedef {import('$lib/entities').PendingRest} PendingRest */
 
-	/** @type {{ workout: Workout; exercises: Array<Exercise> }} */
+	/** @type {{ workout: Workout; exercises: Record<Exercise['label'], Exercise> }} */
 	let { workout, exercises } = $props();
 
 	/**
@@ -79,24 +79,71 @@
 		return fallback;
 	}
 
-	/** @type {PendingActivity} */
-	const pending_rest = { rest: {}, duration: null, instructions: null };
+	const REST = '_rest';
 
 	/**
-	 *
 	 * @param {PendingActivity} activity
-	 * @returns {activity is PendingExercise}
+	 * @returns {'exercise' | 'rest' | null }
+	 * @throws {ReferenceError} If the activity is not recognized
+	 */
+	function activity_type(activity) {
+		if (null === activity || undefined === activity) return null;
+		if ('exercise' in activity) return 'exercise';
+		if ('rest' in activity) return 'rest';
+		return null;
+	}
+
+	/**
+	 * @param {PendingActivity} activity
+	 * @returns {activity is PendingActivity & { exercise: PendingExercise }}
 	 */
 	function is_exercise(activity) {
-		return 'exercise' in activity;
+		return 'exercise' === activity_type(activity);
 	}
+
 	/**
-	 *
 	 * @param {PendingActivity} activity
-	 * @returns {activity is PendingRest}
+	 * @returns {activity is PendingActivity & { rest: PendingRest }}
 	 */
 	function is_rest(activity) {
-		return 'rest' in activity;
+		return 'rest' === activity_type(activity);
+	}
+
+	/**
+	 * @param {PendingActivity} activity
+	 * @returns {() =>  Exercise['label'] | '_rest' | '' }
+	 * @throws {ReferenceError} If the activity is not recognized
+	 */
+	function get_activity_value(activity) {
+		console.log('Setting get_activity_value', activity);
+		return function _get_activity_value() {
+			if (is_exercise(activity)) {
+				return activity.exercise.label ?? ''; // Bind getter needs to be string, not null
+			} else if (is_rest(activity)) return REST;
+			return '';
+		};
+	}
+
+	/**
+	 * @param {PendingActivity} activity
+	 * @returns {(value: string) => void}
+	 */
+	function set_activity_value(activity) {
+		return function _set_activity_value(label) {
+			console.log('_set_activity_value', label, activity);
+			if (exercises[label]) {
+				//activity = { ...activity, rest: undefined, exercise: exercises[label] };
+				//@ts-expect-error
+				delete activity.rest;
+				/** @type {PendingActivity & { exercise: PendingExercise }} */
+				(activity).exercise = exercises[label];
+			} else if (REST === label) {
+				// activity = { ...activity, exercise: undefined, rest: {} };
+				//@ts-expect-error
+				delete activity.exercise;
+				/** @type {PendingActivity & { rest: PendingRest }} */ (activity).rest = {};
+			}
+		};
 	}
 </script>
 
@@ -148,15 +195,16 @@
 				{#each set as activity, a}
 					<tr>
 						<td>
-							<select bind:value={() => {}, (value) => {}}>
+							<!-- https://svelte.dev/playground/9f6614468374436c84a5551ea29591f6?version=5.38.7 -->
+							<select bind:value={get_activity_value(activity), set_activity_value(activity)}>
 								<option></option>
 								<optgroup label="Exercises">
-									{#each exercises as exercise}
-										<option value={exercise.label}>{exercise.name}</option>
+									{#each Object.entries(exercises) as [k, v]}
+										<option value={k}>{v.name}</option>
 									{/each}
 								</optgroup>
 								<optgroup label="Other">
-									<option value="_rest">Rest</option>
+									<option value={REST}>Rest</option>
 								</optgroup>
 							</select>
 						</td>
@@ -172,7 +220,11 @@
 						<td>
 							<button
 								class="thin default"
-								onclick={create_activity(s, a + 1, pending_rest)}
+								onclick={create_activity(s, a + 1, {
+									rest: {},
+									duration: null,
+									instructions: null
+								})}
 								title="Add activity after…"
 								aria-label="Add activity after…"
 							>
@@ -221,7 +273,7 @@
 						<td>
 							<button
 								class="default"
-								onclick={create_activity(s, 0, pending_rest)}
+								onclick={create_activity(s, 0, { rest: {}, duration: null, instructions: null })}
 								title="Add activity after…">+</button
 							>
 						</td>

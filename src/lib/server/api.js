@@ -108,8 +108,8 @@ export async function find_workout(label) {
 }
 
 /**
- * @returns {Promise<Array<Exercise>>}
+ * @returns {Promise<Record<Exercise['label'], Exercise>>}
  */
 export async function get_exercises() {
-	return Promise.resolve(exercises);
+	return Promise.resolve(Object.fromEntries(exercises.map((e) => [e.label, e])));
 }
