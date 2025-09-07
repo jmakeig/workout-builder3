@@ -1,5 +1,3 @@
-//import crypto from 'crypto';
-
 /** @typedef {import('$lib/entities').ID} ID */
 /** @typedef {import('$lib/entities').Exercise} Exercise */
 /** @typedef {import('$lib/entities').PendingExercise} PendingExercise */
@@ -107,4 +105,11 @@ export async function create_workout(input) {
 export async function find_workout(label) {
 	const result = workouts.find((workout) => workout.label === label);
 	return Promise.resolve(result || null);
+}
+
+/**
+ * @returns {Promise<Array<Exercise>>}
+ */
+export async function get_exercises() {
+	return Promise.resolve(exercises);
 }

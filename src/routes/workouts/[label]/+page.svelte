@@ -7,7 +7,7 @@
 
 {data.label}
 <form>
-	<Workout workout={data.workout} />
+	<Workout workout={data.workout} exercises={data.exercises} />
 </form>
 
 <style>
