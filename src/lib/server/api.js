@@ -1,5 +1,6 @@
 //import crypto from 'crypto';
 
+/** @typedef {import('$lib/entities').ID} ID */
 /** @typedef {import('$lib/entities').Exercise} Exercise */
 /** @typedef {import('$lib/entities').PendingExercise} PendingExercise */
 /** @typedef {import('$lib/entities').Workout} Workout */
@@ -17,7 +18,32 @@
 /** @type {Workout[]} */
 const workouts = [];
 /** @type {Exercise[]} */
-const exercises = [];
+const exercises = [
+	{
+		exercise: /** @type {ID} */ ('1'),
+		name: 'Push Up',
+		label: 'push-up',
+		description: null,
+		instructions: null,
+		alternatives: null
+	},
+	{
+		exercise: /** @type {ID} */ ('2'),
+		name: 'Sit Up',
+		label: 'sit-up',
+		description: null,
+		instructions: null,
+		alternatives: null
+	},
+	{
+		exercise: /** @type {ID} */ ('3'),
+		name: 'Squat',
+		label: 'squat',
+		description: null,
+		instructions: null,
+		alternatives: null
+	}
+];
 
 /**
  * @param {any} value

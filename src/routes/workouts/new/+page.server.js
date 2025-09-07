@@ -21,7 +21,7 @@ export const actions = {
 		const workout = await api.create_workout(workout_input);
 
 		// Careful with the params. The message sent back in the `form` or the `fail`
-		// needs to be an object with an `exercise` property (well, `Prop`).
+		// needs to be an object with an `exercise` property (well, `Prop` constant).
 		if (is_invalid(workout)) return fail(400, workout);
 		//return { workout };
 		return redirect(303, `/workouts/${workout.label}`);

@@ -13,23 +13,23 @@
 {/if}
 
 <form method="post" action="?/create">
-	<div>
+	<div class="control">
 		<label for="name">Name</label>
 		<input type="text" id="name" name="name" value={form?.workout.name} />
 	</div>
 
-	<div>
+	<div class="control">
 		<label for="label">Label</label>
 		<input type="text" id="label" name="label" value={form?.workout.label} />
 	</div>
 
-	<div>
+	<div class="control">
 		<label for="description">Description</label>
 		<textarea id="description" name="description">{form?.workout.description}</textarea>
 	</div>
 
-	<div class="buttons">
-		<button type="submit">Save</button>
+	<div class="control actions">
+		<button type="submit" class="default">Save</button>
 		<button>Cancel</button>
 	</div>
 </form>

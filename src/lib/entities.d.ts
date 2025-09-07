@@ -29,7 +29,7 @@ export type Activity = (
 	| {
 			rest: Rest;
 	  }
-) & { duration: number };
+) & { duration: number; instructions: string | null };
 
 export type Exercise = {
 	exercise: ID;
@@ -40,9 +40,7 @@ export type Exercise = {
 	alternatives: Array<Exercise> | null;
 };
 
-type Rest = {
-	instructions: string | null;
-};
+type Rest = {};
 
 export type PendingWorkout = Workout | Loosen<Workout>;
 export type PendingExercise = Exercise | Loosen<Exercise>;
@@ -57,5 +55,5 @@ export type PendingActivity =
 					rest: PendingRest;
 			  }
 	  ) &
-			Loosen<{ duration: number }>);
+			Loosen<{ duration: number, instructions: string }>);
 export type PendingSet = Set | Array<PendingActivity>;
