@@ -100,7 +100,7 @@ export async function create_workout(input) {
 /**
  *
  * @param {Workout['label']} label
- * @returns {Promise<Workout | null>}
+ * @returns {Promise<Result<string, Workout | null, 'workout'>>}
  */
 export async function find_workout(label) {
 	const result = workouts.find((workout) => workout.label === label);
@@ -108,7 +108,7 @@ export async function find_workout(label) {
 }
 
 /**
- * @returns {Promise<Record<Exercise['label'], Exercise>>}
+ * @returns {Promise<Result<void, Record<Exercise['label'], Exercise>>>}
  */
 export async function get_exercises() {
 	return Promise.resolve(Object.fromEntries(exercises.map((e) => [e.label, e])));
