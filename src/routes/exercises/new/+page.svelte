@@ -1,4 +1,6 @@
 <script>
+	import { first } from '$lib/validation';
+
 	/** @type {{ data: import('./$types').PageData, form: import('./$types').ActionData }} */
 	let { data, form } = $props();
 </script>
@@ -6,7 +8,7 @@
 <h1>Create New Exercise</h1>
 
 {#if form?.validations}
-	<p>{form.validations[0].message}</p>
+	<p>{first(form.validations)?.message}</p>
 {:else if form}
 	<p>Success!</p>
 	<pre>{JSON.stringify(form.exercise, null, 2)}</pre>

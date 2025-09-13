@@ -1,3 +1,5 @@
+import { has } from '$lib/validation';
+
 /** @typedef {import('$lib/entities').ID} ID */
 /** @typedef {import('$lib/entities').Exercise} Exercise */
 /** @typedef {import('$lib/entities').PendingExercise} PendingExercise */
@@ -7,6 +9,7 @@
  * @template Entity
  * @typedef {import('$lib/util').Validation<Entity>} Validation
  */
+
 /**
  * @template In, Out
  * @template {string} [Prop = "input"]
@@ -44,8 +47,9 @@ const exercises = [
 ];
 
 /**
- * @param {any} value
- * @returns {boolean}
+ * @template T
+ * @param {T} value
+ * @returns {value is NonNullable<T>}
  */
 function exists(value) {
 	if (undefined === value || null === value) return false;
@@ -66,7 +70,7 @@ export async function create_exercise(input) {
 	if (!exists(input.name)) validations.push({ message: 'Name is required', for: 'name' });
 	if (!exists(input.label)) validations.push({ message: 'Label is required', for: 'label' });
 
-	if (validations.length > 0) {
+	if (has(validations)) {
 		return Promise.resolve({ exercise: input, validations });
 	}
 	const exercise = /** @type {Exercise} */ ({ ...input, exercise: crypto.randomUUID() });
@@ -85,7 +89,7 @@ export async function create_workout(input) {
 	if (!exists(input.name)) validations.push({ message: 'Name is required', for: 'name' });
 	if (!exists(input.label)) validations.push({ message: 'Label is required', for: 'label' });
 
-	if (validations.length > 0) {
+	if (has(validations)) {
 		return Promise.resolve({ workout: input, validations });
 	}
 	const workout = /** @type {Workout} */ ({
@@ -100,7 +104,7 @@ export async function create_workout(input) {
 /**
  *
  * @param {Workout['label']} label
- * @returns {Promise<Result<string, Workout | null, 'workout'>>}
+ * @returns {Promise<Workout | null>}
  */
 export async function find_workout(label) {
 	const result = workouts.find((workout) => workout.label === label);
@@ -108,7 +112,7 @@ export async function find_workout(label) {
 }
 
 /**
- * @returns {Promise<Result<void, Record<Exercise['label'], Exercise>>>}
+ * @returns {Promise<Record<Exercise['label'], Exercise>>}
  */
 export async function get_exercises() {
 	return Promise.resolve(Object.fromEntries(exercises.map((e) => [e.label, e])));
