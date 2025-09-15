@@ -16,13 +16,11 @@ config:
 
 erDiagram
     Workout {
-        ID workout PK
         string label
         string name
         string description
     }
     Set {
-        ID set PK
         string label
         string name
     }
@@ -31,7 +29,6 @@ erDiagram
         string[] instructions
     }
     Exercise {
-        ID exercise PK
         string label
         string name
         string description
