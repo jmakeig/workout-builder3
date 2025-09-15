@@ -80,4 +80,3 @@ export function has(validations, name) {
 export function to_string(validations) {
 	return validations.map((v) => v.message).join(', \n');
 }
-
