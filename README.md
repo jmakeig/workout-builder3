@@ -8,7 +8,7 @@ The entities are modeled as TypeScript types in `$lib/entities.d.ts`. In additio
 
 ```mermaid
 ---
-title: Workout
+title: Workout Builder
 config:
   # layout: elk
   # look: handDrawn
