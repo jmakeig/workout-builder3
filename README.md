@@ -72,17 +72,14 @@ Enforcing business rules, such as validating user inputs or handling database co
 export async function create_<kbd>entity</kbd>(input) {
   /** @type {Validation&lt;<kbd>Entity</kbd>>[]} */
   const validations = [];
-
-  /*  (2)  */
+  // (3)
   if (!test(input.<kbd>property</kbd>)) 
     validations.push({ message: 'Name is required', for: '<kbd>property</kbd>' });
-  
-  /*  (3)  */
+  // (4)
   if (has(validations)) {
     return { <kbd>entity</kbd>: input, validations };
   }
-  
-  /*  (4)  */
+  // (5)
   const <kbd>entity</kbd> = await /** @type {<kbd>Entity</kbd>} */ (
     db.query(`INSERT <kbd>entity</kbd> RETURNING …`);
   );
@@ -92,12 +89,12 @@ export async function create_<kbd>entity</kbd>(input) {
 </figure>
 
 1. Inputs typcially use the `Pending` version of the entity type. This allows (mostly) straightforward mapping from `FormData` in the calling form handler.
-1. APIs that perform validation use the `Result<In, Out, Prop>` return type to convey return values. 
+2. APIs that perform validation use the `Result<In, Out, Prop>` return type to convey return values. 
     * `In` is the type of `input`, for CRUD operations, usually the `Pending` version of an entity
     * `Out` is the expected return type, often the strongly typed form of the pending input. [Postel’s Law](https://en.wikipedia.org/wiki/Robustness_principle): “Be conservative in what you send, be liberal in what you accept from others.”
     * `Prop` is the `string` name of the property in which the `input` will be stashed in the `InvalidResult` instance.
-1. Page handlers, `+page.server.js`, should be “dumb”. They should be responsible for collecting data from the UI and passing to the appropriate API. APIs implement the valaidation logic. Validation errors return `InvalidResult` instances. Page handlers can use the `is_valid()` guard function to differentiate between a `Result` and `InvalidResult` type.
-1. In the happy path, where the input is valid, the return value does not need to be wrapped. This is equivalent to a <code><kbd>Entity</kbd></code> return type. Thus APIs that don’t do any validation do not need to do the `Result`/`InvalidResult` rigamarole.
+3. Page handlers, `+page.server.js`, should be “dumb”. They should be responsible for collecting data from the UI and passing to the appropriate API. APIs implement the valaidation logic. Validation errors return `InvalidResult` instances. Page handlers can use the `is_valid()` guard function to differentiate between a `Result` and `InvalidResult` type.
+4. In the happy path, where the input is valid, the return value does not need to be wrapped. This is equivalent to a <code><kbd>Entity</kbd></code> return type. Thus APIs that don’t do any validation do not need to do the `Result`/`InvalidResult` rigamarole.
 
 <figure>
     <figcaption>Page handler, <code>+page.server.js</code>, form actions</figcaption>
@@ -105,23 +102,21 @@ export async function create_<kbd>entity</kbd>(input) {
 /** @satisfies {import('./$types').Actions} */
 export const actions = {
   create: async ({ request }) => {
-    /*  (1)  */
-    const <kbd>entity</kbd>_input = /** @type {Pending<kbd>Entity</kbd>} */ (
-      Object.fromEntries(await request.formData())
-    );
-    
-    /*  (2)  */
-    const workout = await api.create_<kbd>entity</kbd>(<kbd>entity</kbd>_input);
-    
-    /*  (3)  */
-    if (is_invalid(workout)) return fail(400, <kbd>entity</kbd>);
-    return redirect(303, `/<kbd>entity</kbd>s/${<kbd>entity</kbd>.label}`);
-    //return { <kbd>entity</kbd> };
-  }
+    // (1)
+    const <kbd>entity</kbd>_input = /** @type {Pending<kbd>Entity</kbd>} */ (
+      Object.fromEntries(await request.formData())
+    );
+    // (2)
+    const <kbd>entity</kbd> = await api.create_<kbd>entity</kbd>(<kbd>entity</kbd>_input);
+    // (3)
+    if (is_invalid(<kbd>entity</kbd>)) return fail(400, <kbd>entity</kbd>);
+    //return { <kbd>entity</kbd> };
+    return redirect(303, `/<kbd>entity</kbd>s/${<kbd>entity</kbd>.label}`);
+  }
 };
 </pre>
 </figure>
 
 1. Marshall a `Pending` entity from the submitted `FormData`. More complex objects or form abstractions might need specific mapping logic. The type assertion is a little heavy handed. However, `FormData` is difficult to correctly tpye. 
-1. Turns the `Pending` entity into its stongly typed instance. 
-1. Validation failures use SvelteKit’s `fail()` response to convey an HTTP `400` error that’s available to the page in the `form` property of `$props()`. Validation errors get passed through the `fail()` `Response` and are available as `form?.validations` in the front-end. Exceptions return a `500` `error()`. Generally errors should be allowed to bubble and handled at the closest parent [error boundary](https://joyofcode.xyz/catch-errors-during-rendering-with-svelte-error-boundaries).
+2. Uses the API to turn the `Pending` entity into its stongly typed instance. 
+3. Validation failures use SvelteKit’s `fail()` response to convey an HTTP `400` error that’s available to the page in the `form` property of `$props()`. Validation errors get passed through the `fail()` `Response` and are available as `form?.validations` in the front-end. Exceptions return a `500` `error()`. Generally errors should be allowed to bubble and handled at the closest parent [error boundary](https://joyofcode.xyz/catch-errors-during-rendering-with-svelte-error-boundaries).
