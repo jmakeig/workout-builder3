@@ -8,8 +8,8 @@ The entities are modeled as TypeScript types in [`$lib/entities.d.ts`](https://g
 
 ```mermaid
 ---
-title: Workout Builder
-config:
+# title: Workout Builder
+# config:
   # layout: elk
   # look: handDrawn
 ---
@@ -60,7 +60,7 @@ All data access goes through an API library, `$lib/server/api.js`. The API is re
 Enforcing business rules, such as validating user inputs or handling database constraint violations, are communicated as part of an API’s return types. And `InvalidResult` type return allows a function to return the user input and a collection of one or more validation errors. APIs should only throw (or bubble) exceptions for unexpected states that the user cannot fix themselves by submitting different data. An empty value for a required property is a validation error, not an exceptional case. The user should resubmit with a different value. A dropped database connection, on the other hand, is an error state that the user can’t do anything about. 
 
 <figure>
-    <figcaption>Example API function, [`$lib/server/api.js`](https://github.com/jmakeig/workout-builder3/blob/main/src/lib/server/api.js)</figcaption>
+    <figcaption>Example API function, <a href="https://github.com/jmakeig/workout-builder3/blob/main/src/lib/server/api.js"><code>$lib/server/api.js</code></a></figcaption>
 
 <pre>
 /**
@@ -76,12 +76,12 @@ export async function create_<kbd>entity</kbd>(input) {
   /*  (2)  */
   if (!test(input.<kbd>property</kbd>)) 
     validations.push({ message: 'Name is required', for: '<kbd>property</kbd>' });
-
+  
   /*  (3)  */
   if (has(validations)) {
     return { <kbd>entity</kbd>: input, validations };
   }
-
+  
   /*  (4)  */
   const <kbd>entity</kbd> = await /** @type {<kbd>Entity</kbd>} */ (
     db.query(`INSERT <kbd>entity</kbd> RETURNING …`);
@@ -106,20 +106,20 @@ export async function create_<kbd>entity</kbd>(input) {
 export const actions = {
   create: async ({ request }) => {
     /*  (1)  */
-    const <kbd>entity</kbd>_input = /** @type {Pending<kbd>Entity</kbd>} */ (
-      Object.fromEntries(await request.formData())
-    );
-
+    const <kbd>entity</kbd>_input = /** @type {Pending<kbd>Entity</kbd>} */ (
+      Object.fromEntries(await request.formData())
+    );
+    
     /*  (2)  */
-    const workout = await api.create_<kbd>entity</kbd>(<kbd>entity</kbd>_input);
-
+    const workout = await api.create_<kbd>entity</kbd>(<kbd>entity</kbd>_input);
+    
     /*  (3)  */
-    if (is_invalid(workout)) return fail(400, workout);
-    return redirect(303, `/workouts/${workout.label}`);
-    //return { workout };
-  }
+    if (is_invalid(workout)) return fail(400, <kbd>entity</kbd>);
+    return redirect(303, `/<kbd>entity</kbd>s/${<kbd>entity</kbd>.label}`);
+    //return { <kbd>entity</kbd> };
+  }
 };
-    </pre>
+</pre>
 </figure>
 
 1. Marshall a `Pending` entity from the submitted `FormData`. More complex objects or form abstractions might need specific mapping logic. The type assertion is a little heavy handed. However, `FormData` is difficult to correctly tpye. 
