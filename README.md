@@ -1,10 +1,10 @@
 # SvelteKit Template
 
-This project contains a working, mostly fleshed-out template for a SvelteKit app. It performs <accronym title="Create, Read, Update, Delete">CRUD</acronym> on _entities_, or domain objects, the nouns in your app. The example models a workout, like at the gym. A Workout contains an ordered collection of Sets. A Set is made up up an ordered collection of Activities. Activities can be Exercises or Rest and have a duration, mesured in a number of seconds.
+This project contains a working, mostly fleshed-out template for a SvelteKit app. It performs <accronym title="Create, Read, Update, Delete">CRUD</acronym> on _entities_, or domain objects, the nouns in your app. The example models a workout, like at the gym. A Workout contains an ordered collection of Sets. A Set is made up of an ordered collection of Activities. Activities can be Exercises or Rest and have a duration, measured in a number of seconds.
 
 ## Entities
 
-The entities are modeled as TypeScript types in `$lib/entities.d.ts`. In addition to its strongly typed definition, each entity has a `Pending` version. _Pending_ entities are loosely typed, allowing them to be bound to inputs, for example, in a HTML form that only supports `string` inputs (well, [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData)).
+The entities are modeled as TypeScript types in [`$lib/entities.d.ts`](https://github.com/jmakeig/workout-builder3/blob/main/src/lib/entities.d.ts). In addition to its strongly typed definition, each entity has a `Pending` version. _Pending_ entities are loosely typed, allowing them to be bound to inputs, for example, in a HTML form that only supports `string` inputs (well, [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData)).
 
 ```mermaid
 ---
@@ -39,7 +39,7 @@ erDiagram
     Set ONE TO ONE OR MORE Activity : "has"
     Activity ||..|| Exercise : "is"
     Activity ||..|| Rest : "is"
-    Exercise ONE TO ZERO OR MORE Exercise : "aternatives"
+    Exercise ONE TO ZERO OR MORE Exercise : "alternatives"
 ```
 
 ## CRUD
@@ -60,7 +60,7 @@ All data access goes through an API library, `$lib/server/api.js`. The API is re
 Enforcing business rules, such as validating user inputs or handling database constraint violations, are communicated as part of an API’s return types. And `InvalidResult` type return allows a function to return the user input and a collection of one or more validation errors. APIs should only throw (or bubble) exceptions for unexpected states that the user cannot fix themselves by submitting different data. An empty value for a required property is a validation error, not an exceptional case. The user should resubmit with a different value. A dropped database connection, on the other hand, is an error state that the user can’t do anything about. 
 
 <figure>
-    <figcaption>Example API function, `$lib/server/api.js`</figcaption>
+    <figcaption>Example API function, [`$lib/server/api.js`](https://github.com/jmakeig/workout-builder3/blob/main/src/lib/server/api.js)</figcaption>
 
 <pre>
 /**
@@ -99,26 +99,29 @@ export async function create_<kbd>entity</kbd>(input) {
 1. Page handlers, `+page.server.js`, should be “dumb”. They should be responsible for collecting data from the UI and passing to the appropriate API. APIs implement the valaidation logic. Validation errors return `InvalidResult` instances. Page handlers can use the `is_valid()` guard function to differentiate between a `Result` and `InvalidResult` type.
 1. In the happy path, where the input is valid, the return value does not need to be wrapped. This is equivalent to a <code><kbd>Entity</kbd></code> return type. Thus APIs that don’t do any validation do not need to do the `Result`/`InvalidResult` rigamarole.
 
-Validation failures use SvelteKit’s `fail()` response to convey an HTTP `400` error that’s available to the page in the `form` property of `$props()`. Exceptions return a `500` `error()`. Generally errors should be allowed to bubble and handled at the closest parent [error boundary](https://joyofcode.xyz/catch-errors-during-rendering-with-svelte-error-boundaries).
-
 <figure>
     <figcaption>Page handler, <code>+page.server.js</code>, form actions</figcaption>
     <pre>
 /** @satisfies {import('./$types').Actions} */
 export const actions = {
   create: async ({ request }) => {
-    const workout_input = /** @type {PendingWorkout} */ (
+    /*  (1)  */
+    const <kbd>entity</kbd>_input = /** @type {Pending<kbd>Entity</kbd>} */ (
       Object.fromEntries(await request.formData())
     );
 
-    const workout = await api.create_workout(workout_input);
+    /*  (2)  */
+    const workout = await api.create_<kbd>entity</kbd>(<kbd>entity</kbd>_input);
 
-    // Careful with the params. The message sent back in the `form` or the `fail`
-    // needs to be an object with an `exercise` property (well, `Prop` constant).
-    if (is_invalid(workout)) return fail(400, workout);
-    //return { workout };
-    return redirect(303, `/workouts/${workout.label}`);
+    /*  (3)  */
+    if (is_invalid(workout)) return fail(400, workout);
+    return redirect(303, `/workouts/${workout.label}`);
+    //return { workout };
   }
 };
     </pre>
 </figure>
+
+1. Marshall a `Pending` entity from the submitted `FormData`. More complex objects or form abstractions might need specific mapping logic. The type assertion is a little heavy handed. However, `FormData` is difficult to correctly tpye. 
+1. Turns the `Pending` entity into its stongly typed instance. 
+1. Validation failures use SvelteKit’s `fail()` response to convey an HTTP `400` error that’s available to the page in the `form` property of `$props()`. Validation errors get passed through the `fail()` `Response` and are available as `form?.validations` in the front-end. Exceptions return a `500` `error()`. Generally errors should be allowed to bubble and handled at the closest parent [error boundary](https://joyofcode.xyz/catch-errors-during-rendering-with-svelte-error-boundaries).
