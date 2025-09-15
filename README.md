@@ -28,17 +28,15 @@ erDiagram
     }
     Activity {
         number duration
+        string[] instructions
     }
     Exercise {
         ID exercise PK
         string label
         string name
         string description
-        string[] instructions
     }
-    Rest {
-        string[] instructions
-    }
+    Rest { }
 
     Workout ONE TO ONE OR MORE Set : "has"
     Set ONE TO ONE OR MORE Activity : "has"
