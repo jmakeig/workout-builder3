@@ -13,7 +13,29 @@
 	<p>Success!</p>
 	<pre>{JSON.stringify(form.workout, null, 2)}</pre>
 {/if}
-
+<!--
+{#snippet contro(name, label,value)}
+	<div class="control">
+		<label for="name">Name</label>
+		<div class="contents">
+			<input
+				type="text"
+				id={name}
+				{name}
+				{value}
+				placeholder={'\u200B'}
+				aria-invalid={has(form?.validations, 'name')}
+				aria-errormessage={has(form?.validations, 'name') ? `name-error` : undefined}
+			/>
+			{#if has(form?.validations, 'name')}
+				<p class="validation" id="name-error" aria-live="assertive">
+					{first(form?.validations, 'name')?.message}
+				</p>
+			{/if}
+		</div>
+	</div>
+{/snippet}
+-->
 <form method="post" action="?/create">
 	<div class="control">
 		<label for="name">Name</label>
