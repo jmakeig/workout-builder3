@@ -1,6 +1,8 @@
 # SvelteKit Template
 
-This project contains a working, mostly fleshed-out template for a SvelteKit app. It performs <accronym title="Create, Read, Update, Delete">CRUD</acronym> on _entities_, or domain objects, the nouns in your app. The example models a workout, like at the gym. A Workout contains an ordered collection of Sets. A Set is made up of an ordered collection of Activities. Activities can be Exercises or Rest and have a duration, measured in a number of seconds.
+This project contains a working, mostly fleshed-out template for a SvelteKit app. It performs <accronym title="Create, Read, Update, Delete">CRUD</acronym> on _entities_, or domain objects&em;the nouns in your app.
+
+The example models a workout, like at the gym. A Workout contains an ordered collection of Sets. A Set is made up of an ordered collection of Activities. Activities can be Exercises or Rest and have a duration, measured in a number of seconds.
 
 ## Entities
 
@@ -46,18 +48,18 @@ erDiagram
 
 Each entity has the following default routes:
 
-- `/entities`: Lists all instances, allows clicking into
+- <code>/<kbd>entities</kbd></code>: Lists all instances, allows clicking into
   - `/[label]`: An individual entity instance, by default, read-only
     - `/edit`: A form view that allows for updating an individual instance
   - `/new/`: A form view to create a new instance. A `POST` redirects to `/eneties/[label]` or `/eneties/[label]/edit`.
 
 ### Data Access
 
-All data access goes through an API library, `$lib/server/api.js`. The API is responsible for encapsulating the database and enforcing business rules. The `$lib/server` path ensures that it‘s not executed on the client.
+All data access goes through an API library, `$lib/server/api.js`. The API is responsible for encapsulating the database and enforcing business rules. The `$lib/server` path ensures that it‘s not executed on the client. Centralization also simplifies integration testing the API and mocking for UI tests.
 
 #### Validation
 
-Enforcing business rules, such as validating user inputs or handling database constraint violations, are communicated as part of an API’s return types. And `InvalidResult` type return allows a function to return the user input and a collection of one or more validation errors. APIs should only throw (or bubble) exceptions for unexpected states that the user cannot fix themselves by submitting different data. An empty value for a required property is a validation error, not an exceptional case. The user should resubmit with a different value. A dropped database connection, on the other hand, is an error state that the user can’t do anything about.
+Enforcing business rules, such as validating user inputs or handling database constraint violations, are communicated as part of an API’s return types. An `InvalidResult` type return provides a standard way for a function to return the user input and a collection of one or more validation errors. APIs should only throw (or bubble) exceptions for unexpected states that the user cannot fix themselves by submitting different data. For example, an empty value for a required property is a validation error, not an exceptional case. The user should resubmit with a different value. A dropped database connection, on the other hand, is an error state that the user can’t do anything about.
 
 <figure>
     <figcaption>Example API function, <a href="https://github.com/jmakeig/workout-builder3/blob/main/src/lib/server/api.js"><code>$lib/server/api.js</code></a></figcaption>
