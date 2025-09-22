@@ -5,15 +5,6 @@
 	let { data } = $props();
 </script>
 
-{data.label}
 <form>
 	<Workout workout={data.workout} exercises={data.exercises} />
 </form>
-
-<style>
-	form {
-		max-width: 60rem;
-		min-width: 20rem;
-		margin: 0 auto;
-	}
-</style>

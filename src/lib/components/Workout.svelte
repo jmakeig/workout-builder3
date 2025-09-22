@@ -148,7 +148,7 @@
 </script>
 
 <div
-	style="position: absolute; top: 0; right: 0; background: #efefef; padding: 1em; width: 20em; height: 20em; overflow: auto; border: solid 1px;"
+	style="position: absolute; top: 0; right: 0; background: #efefef; padding: 1em; width: 20em; height: 20em; overflow: auto; border: solid 1px; font-size: 0.75em;"
 >
 	<pre>{JSON.stringify(sets, null, 2)}</pre>
 </div>
