@@ -1,3 +1,4 @@
+import { workout_schema } from '$lib/entity-helpers';
 import { has } from '$lib/validation';
 
 /** @typedef {import('$lib/entities').ID} ID */
@@ -85,6 +86,9 @@ export async function create_exercise(input) {
 export async function create_workout(input) {
 	/** @type {Validation<Workout>[]} */
 	const validations = [];
+
+	const schema = workout_schema();
+	const validation_result = schema['~standard'].validate(input);
 
 	if (!exists(input.name)) validations.push({ message: 'Name is required', for: 'name' });
 	if (!exists(input.label)) validations.push({ message: 'Label is required', for: 'label' });

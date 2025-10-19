@@ -16,7 +16,7 @@ export type Workout = {
 	workout: ID;
 	name: string;
 	label: string;
-	description: string;
+	description: string | null;
 	sets: Set[];
 };
 

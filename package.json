@@ -12,10 +12,13 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"lint": "prettier --check ."
+		"lint": "prettier --check .",
+		"test": "vitest run",
+		"test:watch": "vitest watch"
 	},
 	"devDependencies": {
 		"@opentelemetry/api": "1.9.0",
+		"@standard-schema/spec": "1.0.0",
 		"@sveltejs/adapter-auto": "6.1.1",
 		"@sveltejs/kit": "2.46.5",
 		"@sveltejs/vite-plugin-svelte": "6.2.1",
@@ -26,6 +29,7 @@
 		"svelte": "5.39.12",
 		"svelte-check": "4.3.3",
 		"typescript": "5.9.3",
-		"vite": "7.1.9"
+		"vite": "7.1.9",
+		"vitest": "3.2.4"
 	}
 }
