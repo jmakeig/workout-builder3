@@ -26,7 +26,7 @@ import { setServers } from 'dns';
  * @param {(PropertyKey | PathSegment)[]} [base_path]
  * @returns {value is Workout}
  */
-function is_valid_workout(value, on_validate = (issues) => {}, base_path = []) {
+export function is_valid_workout(value, on_validate = (issues) => {}, base_path = []) {
 	/** @type {Issue[]} */
 	const issues = [];
 
@@ -191,8 +191,53 @@ export function is_valid_exercise(value, on_validate = (issues) => {}, base_path
 		} else {
 			issues.push({ message: 'Exercise description invalid', path: [...base_path, 'description'] });
 		}
-		// TODO: Instructions
-		// TODO: Alternatives
+		if ('instructions' in value) {
+			if (null === value.instructions) {
+				// OK
+			} else if (Array.isArray(value.instructions)) {
+				value.instructions.forEach((instruction, i) => {
+					if ('string' !== typeof instruction) {
+						issues.push({
+							message: 'Exercise instruction must be text.',
+							path: [...base_path, 'instructions', i]
+						});
+					}
+				});
+			} else {
+				issues.push({
+					message: 'Exercise instructions must exist.',
+					path: [...base_path, 'instructions']
+				});
+			}
+		} else {
+			issues.push({
+				message: 'Exercise instructions must exist.',
+				path: [...base_path, 'instructions']
+			});
+		}
+		if ('alternatives' in value) {
+			if (null === value.alternatives) {
+				// OK
+			} else if (Array.isArray(value.alternatives)) {
+				value.alternatives.forEach((alternative, a) =>
+					is_valid_exercise(alternative, (iss) => issues.push(...iss), [
+						...base_path,
+						'alternatives',
+						a
+					])
+				);
+			} else {
+				issues.push({
+					message: 'Alternatives can only be exercises.',
+					path: [...base_path, 'alternatives']
+				});
+			}
+		} else {
+			issues.push({
+				message: 'Exercise alternatives must exist.',
+				path: [...base_path, 'alternatives']
+			});
+		}
 	} else {
 		issues.push({ message: 'Workout must exist.', path: [...base_path] });
 	}
