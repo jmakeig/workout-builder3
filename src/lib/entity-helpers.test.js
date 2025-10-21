@@ -229,4 +229,41 @@ describe('Exercise', () => {
 		expect(issues[0].path).toEqual(['name']);
 		expect(issues[1].path).toEqual(['alternatives', 0]);
 	});
+	test('Recursive exercises', () => {
+		/** @type {Issue[]} */
+		const issues = [];
+		const is_valid = is_valid_exercise(
+			{
+				exercise: '1',
+				name: 'P',
+				label: 'push-up',
+				description: null,
+				instructions: null,
+				alternatives: [
+					{
+						exercise: '1',
+						name: 'P',
+						label: 'push-up',
+						description: null,
+						instructions: null,
+						alternatives: [
+							{
+								exercise: '1',
+								name: 'Push-Up',
+								label: 'push-up',
+								description: null,
+								instructions: null,
+								alternatives: null
+							}
+						]
+					}
+				]
+			},
+			(iss) => issues.push(...iss)
+		);
+		expect(is_valid).toBe(false);
+		expect(issues).toHaveLength(2);
+		expect(issues[0].path).toEqual(['name']);
+		expect(issues[1].path).toEqual(['alternatives', 0, 'name']);
+	});
 });
