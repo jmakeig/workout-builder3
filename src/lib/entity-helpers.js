@@ -3,8 +3,6 @@
  * @typedef {import('@standard-schema/spec').StandardSchemaV1<Input, Output>} StandardSchemaV1
  */
 
-import { setServers } from 'dns';
-
 /**
  * @typedef {import('$lib/entities').ID} ID
  * @typedef {import('$lib/entities').Workout} Workout
