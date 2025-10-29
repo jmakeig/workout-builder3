@@ -21,7 +21,7 @@
  *
  * @param {unknown} value
  * @param {(issues: Issue[]) => void} [on_validate]
- * @param {(PropertyKey | PathSegment)[]} [base_path]
+ * @param {ReadonlyArray<PropertyKey | PathSegment>} [base_path]
  * @returns {value is Workout}
  */
 export function is_valid_workout(value, on_validate = (issues) => {}, base_path = []) {
