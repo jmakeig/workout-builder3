@@ -1,4 +1,4 @@
-import { workout_schema } from '$lib/entity-helpers';
+import { is_valid_exercise, new_id, workout_schema } from '$lib/entity-helpers';
 import { has } from '$lib/validation';
 
 /** @typedef {import('$lib/entities').ID} ID */
@@ -71,10 +71,10 @@ export async function create_exercise(input) {
 	if (!exists(input.name)) validations.push({ message: 'Name is required', for: 'name' });
 	if (!exists(input.label)) validations.push({ message: 'Label is required', for: 'label' });
 
-	if (has(validations)) {
-		return Promise.resolve({ exercise: input, validations });
+	if (!is_valid_exercise(input)) {
+		return Promise.resolve({ exercise: input, validations: [{ message: 'TODO: Nope!' }] });
 	}
-	const exercise = /** @type {Exercise} */ ({ ...input, exercise: crypto.randomUUID() });
+	const exercise = { ...input, exercise: new_id() };
 	exercises.push(exercise);
 	return Promise.resolve(exercise);
 }

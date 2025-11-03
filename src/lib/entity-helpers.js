@@ -261,3 +261,10 @@ export function workout_schema() {
 		}
 	};
 }
+/**
+ *
+ * @returns {ID}
+ */
+export function new_id() {
+	return /** @type {ID} */ (crypto.randomUUID());
+}
