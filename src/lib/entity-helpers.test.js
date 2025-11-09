@@ -16,8 +16,8 @@ import {
  */
 
 /**
- * @typedef {import('@standard-schema/spec').StandardSchemaV1.Issue} Issue
- * @typedef {import('@standard-schema/spec').StandardSchemaV1.PathSegment} PathSegment
+ * @template Entity
+ * @typedef {import('$lib/util').Validation<Entity>} Validation
  */
 
 describe('Workout', () => {
@@ -97,7 +97,7 @@ describe('Set', () => {
 		).toBe(true);
 	});
 	test('Set path', () => {
-		/** @type {Issue[]} */
+		/** @type {Validation<Set>[]} */
 		const issues = [];
 		const is_valid = is_valid_set(
 			[
@@ -113,7 +113,7 @@ describe('Set', () => {
 		expect(issues[0].path).toEqual([0, 'duration']);
 	});
 	test('Set path', () => {
-		/** @type {Issue[]} */
+		/** @type {Validation<Set>[]} */
 		const issues = [];
 		const is_valid = is_valid_set(
 			[
@@ -193,7 +193,7 @@ describe('Exercise', () => {
 		).toBe(false);
 	});
 	test('Nested paths', () => {
-		/** @type {Issue[]} */
+		/** @type {Validation<Exercise>[]} */
 		const issues = [];
 		const is_valid = is_valid_exercise(
 			{
@@ -211,7 +211,7 @@ describe('Exercise', () => {
 		expect(issues[0].path).toEqual(['name']);
 	});
 	test('Multiple nested paths', () => {
-		/** @type {Issue[]} */
+		/** @type {Validation<Exercise>[]} */
 		const issues = [];
 		const is_valid = is_valid_exercise(
 			{
@@ -230,7 +230,7 @@ describe('Exercise', () => {
 		expect(issues[1].path).toEqual(['alternatives', 0]);
 	});
 	test('Recursive exercises', () => {
-		/** @type {Issue[]} */
+		/** @type {Validation<Exercise>[]} */
 		const issues = [];
 		const is_valid = is_valid_exercise(
 			{

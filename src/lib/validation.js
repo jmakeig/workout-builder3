@@ -14,6 +14,10 @@
  */
 
 /**
+ * @typedef {import('./util').Path} Path
+ */
+
+/**
  *
  * @param {Result<any, any, string>} result
  * @returns {result is InvalidResult<any, any, string>}
@@ -33,7 +37,28 @@ export function is_invalid(result) {
 export function by(validations, name) {
 	if (undefined === validations) return undefined;
 	if (undefined === name) return validations;
-	return validations.filter((v) => name === v.for);
+	return validations.filter((v) => name === path_for(v.path));
+}
+
+/**
+ * @param {Path} [path]
+ * @returns {string | undefined}
+ */
+export function path_for(path) {
+	if (undefined === path) return undefined;
+	return path.reduce((/** @type {string} */ acc, segment) => {
+		if ('number' === typeof segment) {
+			return `${acc}[${segment}]`;
+		} else if ('symbol' === typeof segment) {
+			return `${acc}["${String(segment)}"]`;
+		} else {
+			if ('' === acc) {
+				return String(segment);
+			} else {
+				return `${acc}.${String(segment)}`;
+			}
+		}
+	}, '');
 }
 
 /**
@@ -46,7 +71,7 @@ export function by(validations, name) {
  */
 export function general(validations) {
 	if (undefined === validations) return undefined;
-	return validations.filter((v) => undefined === v.for);
+	return validations.filter((v) => undefined === v.path);
 }
 
 /**
@@ -70,13 +95,4 @@ export function first(validations, name) {
  */
 export function has(validations, name) {
 	return Boolean(first(validations, name));
-}
-
-/**
- * @template Entity
- * @param {Validation<Entity>[]} validations
- * @returns {string}
- */
-export function to_string(validations) {
-	return validations.map((v) => v.message).join(', \n');
 }

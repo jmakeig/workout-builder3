@@ -13,19 +13,23 @@
  */
 
 /**
- * @typedef {import('@standard-schema/spec').StandardSchemaV1.Issue} Issue
- * @typedef {import('@standard-schema/spec').StandardSchemaV1.PathSegment} PathSegment
+ * @template Entity
+ * @typedef {import('$lib/util').Validation<Entity>} Validation
+ */
+
+/**
+ * @typedef {import('$lib/util').Path} Path
  */
 
 /**
  *
  * @param {unknown} value
- * @param {(issues: Issue[]) => void} [on_validate]
- * @param {ReadonlyArray<PropertyKey | PathSegment>} [base_path]
+ * @param {(issues: Validation<Workout>[]) => void} [on_validate]
+ * @param {Path} [base_path = []]
  * @returns {value is Workout}
  */
 export function is_valid_workout(value, on_validate = (issues) => {}, base_path = []) {
-	/** @type {Issue[]} */
+	/** @type {Validation<Workout>[]} */
 	const issues = [];
 
 	// Existence
@@ -79,12 +83,12 @@ export function is_valid_workout(value, on_validate = (issues) => {}, base_path 
 }
 /**
  * @param {unknown} value
- * @param {(issues: Issue[]) => void} [on_validate]
- * @param {(PropertyKey | PathSegment)[]} [base_path]
+ * @param {(issues: Validation<Set>[]) => void} [on_validate]
+ * @param {Path} [base_path = []]
  * @returns {value is Set}
  */
 export function is_valid_set(value, on_validate = (issues) => {}, base_path = []) {
-	/** @type {Issue[]} */
+	/** @type {Validation<Set>[]} */
 	const issues = [];
 
 	// Existence
@@ -102,12 +106,12 @@ export function is_valid_set(value, on_validate = (issues) => {}, base_path = []
 
 /**
  * @param {unknown} value Probably a PendingActivity
- * @param {(issues: Issue[]) => void} [on_validate]
- * @param {(PropertyKey | PathSegment)[]} [base_path]
+ * @param {(issues: Validation<Activity>[]) => void} [on_validate]
+ * @param {Path} [base_path = []]
  * @returns {value is Activity}
  */
 export function is_valid_activity(value, on_validate = (issues) => {}, base_path = []) {
-	/** @type {Issue[]} */
+	/** @type {Validation<Activity>[]} */
 	const issues = [];
 
 	// Existence
@@ -146,12 +150,12 @@ export function is_valid_activity(value, on_validate = (issues) => {}, base_path
 
 /**
  * @param {unknown} value
- * @param {(issues: Issue[]) => void} [on_validate]
- * @param {(PropertyKey | PathSegment)[]} [base_path]
+ * @param {(issues: Validation<Exercise>[]) => void} [on_validate]
+ * @param {Path} [base_path = []]
  * @returns {value is Exercise}
  */
 export function is_valid_exercise(value, on_validate = (issues) => {}, base_path = []) {
-	/** @type {Issue[]} */
+	/** @type {Validation<Exercise>[]} */
 	const issues = [];
 
 	// Existence
@@ -244,23 +248,6 @@ export function is_valid_exercise(value, on_validate = (issues) => {}, base_path
 	return 0 === issues.length;
 }
 
-/**
- * @returns {StandardSchemaV1<PendingWorkout, Workout>}
- */
-export function workout_schema() {
-	return {
-		'~standard': {
-			version: 1,
-			vendor: 'jmakeig',
-			validate(value) {
-				/** @type {Issue[]} */
-				const issues = [];
-				if (is_valid_workout(value, (i) => issues.push(...i))) return { value };
-				return { issues };
-			}
-		}
-	};
-}
 /**
  *
  * @returns {ID}

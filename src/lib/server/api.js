@@ -1,4 +1,4 @@
-import { is_valid_exercise, new_id, workout_schema } from '$lib/entity-helpers';
+import { is_valid_exercise, new_id } from '$lib/entity-helpers';
 import { has } from '$lib/validation';
 
 /** @typedef {import('$lib/entities').ID} ID */
@@ -68,9 +68,6 @@ export async function create_exercise(input) {
 	/** @type {Validation<Exercise>[]} */
 	const validations = [];
 
-	if (!exists(input.name)) validations.push({ message: 'Name is required', for: 'name' });
-	if (!exists(input.label)) validations.push({ message: 'Label is required', for: 'label' });
-
 	if (!is_valid_exercise(input)) {
 		return Promise.resolve({ exercise: input, validations: [{ message: 'TODO: Nope!' }] });
 	}
@@ -87,12 +84,6 @@ export async function create_workout(input) {
 	/** @type {Validation<Workout>[]} */
 	const validations = [];
 
-	const schema = workout_schema();
-	const validation_result = schema['~standard'].validate(input);
-
-	if (!exists(input.name)) validations.push({ message: 'Name is required', for: 'name' });
-	if (!exists(input.label)) validations.push({ message: 'Label is required', for: 'label' });
-
 	if (has(validations)) {
 		return Promise.resolve({ workout: input, validations });
 	}
@@ -103,6 +94,10 @@ export async function create_workout(input) {
 	});
 	workouts.push(workout);
 	return Promise.resolve(workout);
+}
+
+export async function get_workouts() {
+	return Promise.resolve(workouts);
 }
 
 /**

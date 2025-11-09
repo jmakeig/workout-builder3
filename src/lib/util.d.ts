@@ -1,3 +1,5 @@
+import type { P } from 'vitest/dist/chunks/environment.d.cL3nLXbE.js';
+
 export type FormInput<T> = {
 	[p in keyof T]: T[p] | null | string; // | FormDataEntryValue
 };
@@ -55,10 +57,13 @@ type Forable<Entity> =
  * e.g. `'id'` or `'workloads[3]'`.
  */
 
-export type Validation<T = unknown> = {
-	message: string | AtLeastOne<{ [K in Locale]: string }>;
-	for?: Forable<T>;
+export type Validation<Entity = unknown> = {
+	readonly message: string | AtLeastOne<{ [K in Locale]: string }>;
+	// for?: Forable<Entity>;
+	readonly path?: Path;
 };
+
+export type Path = ReadonlyArray<PropertyKey>;
 
 /**
  * A response to an API call. A response can either be the plain output entity, `Out`,
