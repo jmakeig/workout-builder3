@@ -14,7 +14,7 @@ import { has } from '$lib/validation';
 /**
  * @template In, Out
  * @template {string} [Prop = "input"]
- * @typedef {import('$lib/util').Result<In, Out, Prop>} Result 
+ * @typedef {import('$lib/util').MaybeInvalid<In, Out, Prop>} Result 
  * /
 
 /** @type {Workout[]} */

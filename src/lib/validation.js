@@ -1,12 +1,12 @@
 /**
  * @template In, Out
  * @template {string} [Prop = "input"]
- * @typedef {import('$lib/util').Result<In, Out, Prop>} Result
+ * @typedef {import('$lib/util').MaybeInvalid<In, Out, Prop>} Result
  */
 /**
  * @template In, Out
  * @template {string} [Prop = "input"]
- * @typedef {import('$lib/util').InvalidResult<In, Out, Prop>} InvalidResult
+ * @typedef {import('$lib/util').Invalid<In, Out, Prop>} InvalidResult
  */
 /**
  * @template Entity

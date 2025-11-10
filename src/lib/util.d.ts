@@ -76,12 +76,12 @@ export type Path = ReadonlyArray<PropertyKey>;
  * Validation is an expected part of the API contract and thus is modeled in the
  * responses from API calls. Thrown errors should represent exceptional circumstances.
  */
-export type Result<In, Out, Prop extends string = 'input'> = Out | InvalidResult<In, Out, Prop>;
+export type MaybeInvalid<In, Out, Prop extends string = 'input'> = Out | Invalid<In, Out, Prop>;
 
 /**
  * A way to communicate a business rule violation in an API call.
  */
-export type InvalidResult<In, Out, Prop extends string = 'input'> = {
+export type Invalid<In, Out, Prop extends string = 'input'> = {
 	validations: Array<Validation<Out>>;
 } & {
 	[property in Prop]: In;
