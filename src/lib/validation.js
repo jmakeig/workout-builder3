@@ -1,7 +1,7 @@
 /**
  * @template In, Out
  * @template {string} [Prop = "input"]
- * @typedef {import('$lib/util').MaybeInvalid<In, Out, Prop>} Result
+ * @typedef {import('$lib/util').MaybeInvalid<In, Out, Prop>} MaybeInvalid
  */
 /**
  * @template In, Out
@@ -19,7 +19,7 @@
 
 /**
  *
- * @param {Result<any, any, string>} result
+ * @param {MaybeInvalid<any, any, string>} result
  * @returns {result is InvalidResult<any, any, string>}
  */
 export function is_invalid(result) {

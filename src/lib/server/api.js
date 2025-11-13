@@ -1,4 +1,4 @@
-import { is_valid_exercise, new_id } from '$lib/entity-helpers';
+import { is_valid_exercise, is_valid_workout, new_id } from '$lib/entity-helpers';
 import { has } from '$lib/validation';
 
 /** @typedef {import('$lib/entities').ID} ID */
@@ -14,8 +14,8 @@ import { has } from '$lib/validation';
 /**
  * @template In, Out
  * @template {string} [Prop = "input"]
- * @typedef {import('$lib/util').MaybeInvalid<In, Out, Prop>} Result 
- * /
+ * @typedef {import('$lib/util').MaybeInvalid<In, Out, Prop>} MaybeInvalid
+ */
 
 /** @type {Workout[]} */
 const workouts = [];
@@ -48,55 +48,59 @@ const exercises = [
 ];
 
 /**
- * @template T
- * @param {T} value
- * @returns {value is NonNullable<T>}
- */
-function exists(value) {
-	if (undefined === value || null === value) return false;
-	if ('string' === typeof value) return '' !== value;
-	if ('number' === typeof value) return !Number.isNaN(value);
-	return true;
-}
-
-/**
  *
  * @param {PendingExercise} input
- * @returns {Promise<Result<PendingExercise, Exercise, 'exercise'>>}
+ * @returns {Promise<MaybeInvalid<PendingExercise, Exercise, 'exercise'>>}
  */
 export async function create_exercise(input) {
 	/** @type {Validation<Exercise>[]} */
 	const validations = [];
 
-	if (!is_valid_exercise(input)) {
-		return Promise.resolve({ exercise: input, validations: [{ message: 'TODO: Nope!' }] });
-	}
 	const exercise = { ...input, exercise: new_id() };
-	exercises.push(exercise);
-	return Promise.resolve(exercise);
+	if (is_valid_exercise(exercise)) {
+		exercises.push(exercise);
+		return Promise.resolve(exercise);
+	}
+
+	return { exercise, validations };
 }
 
 /**
  * @param {PendingWorkout} input
- * @returns {Promise<Result<PendingWorkout, Workout, 'workout'>>}
+ * @returns {Promise<MaybeInvalid<PendingWorkout, Workout, 'workout'>>}
  */
 export async function create_workout(input) {
+	const workout = {
+		...input,
+		workout: new_id(),
+		sets: input.sets || [] // Assumes that the initial creation does not set this
+	};
 	/** @type {Validation<Workout>[]} */
 	const validations = [];
-
-	if (has(validations)) {
-		return Promise.resolve({ workout: input, validations });
+	if (is_valid_workout(workout, (issues) => validations.push(...issues))) {
+		workouts.push(workout);
+		return Promise.resolve(workout);
 	}
-	const workout = /** @type {Workout} */ ({
-		...input,
-		workout: crypto.randomUUID(),
-		sets: input.sets || [] // Assumes that the initial creation does not set this
-	});
-	workouts.push(workout);
-	return Promise.resolve(workout);
+	return { workout, validations };
 }
 
-export async function get_workouts() {
+/**
+ * @param {{with_exercises: Exercise['label'][]}} [params]
+ * @returns {Promise<Workout[]>}
+ */
+export async function get_workouts(params) {
+	if (params && 'with_exercises' in params) {
+		return workouts.filter((workout) => {
+			for (const set of workout.sets) {
+				for (const activity of set) {
+					if ('exercise' in activity && params.with_exercises.includes(activity.exercise.label)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		});
+	}
 	return Promise.resolve(workouts);
 }
 
@@ -115,4 +119,14 @@ export async function find_workout(label) {
  */
 export async function get_exercises() {
 	return Promise.resolve(Object.fromEntries(exercises.map((e) => [e.label, e])));
+}
+
+/**
+ *
+ * @param {Workout['label']} label
+ * @returns {Promise<Exercise | null>}
+ */
+export async function find_exercise(label) {
+	const result = exercises.find((exercise) => exercise.label === label);
+	return Promise.resolve(result || null);
 }
