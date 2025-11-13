@@ -1,5 +1,3 @@
-import type { P } from 'vitest/dist/chunks/environment.d.cL3nLXbE.js';
-
 export type FormInput<T> = {
 	[p in keyof T]: T[p] | null | string; // | FormDataEntryValue
 };
