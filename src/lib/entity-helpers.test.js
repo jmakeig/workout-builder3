@@ -9,11 +9,11 @@ import {
 } from './entity-helpers';
 
 expect.extend({
-	isValid(received, expected) {
+	toBeValid(received, expected) {
 		return {
 			// do not alter your "pass" based on isNot. Vitest does it for you
 			pass: !is_invalid(received) === expected,
-			message: () => `${JSON.stringify(received)} from isValid() expectation`
+			message: () => `${JSON.stringify(received)} from toBeValid() expectation`
 		};
 	}
 });
@@ -27,7 +27,7 @@ expect.extend({
  * @typedef {import('$lib/entities').Exercise} Exercise
  */
 
-describe.skip('Workout', () => {
+describe('Workout', () => {
 	test('Workout valid', () => {
 		expect(
 			validate_workout({
@@ -36,33 +36,31 @@ describe.skip('Workout', () => {
 				description: 'A quick morning workout to start the day',
 				sets: [] // TODO: Should this be null?
 			})
-		).toBe(true);
+		).toBeValid(true);
 	});
 });
 
 describe('Activity', () => {
 	test('Activity valid', () => {
-		// expect(
-		// 	!is_invalid(
-		// 		validate_activity({
-		// 			exercise: {
-		// 				exercise: '1',
-		// 				name: 'Push Up',
-		// 				label: 'push-up',
-		// 				description: null,
-		// 				instructions: null,
-		// 				alternatives: null
-		// 			},
-		// 			duration: 30
-		// 		})
-		// 	)
-		// ).toBe(true);
+		expect(
+			validate_activity({
+				exercise: {
+					exercise: '1',
+					name: 'Push Up',
+					label: 'push-up',
+					description: null,
+					instructions: null,
+					alternatives: null
+				},
+				duration: 30
+			})
+		).toBeValid(true);
 		expect(
 			validate_activity({
 				rest: {},
 				duration: 30
 			})
-		).isValid(true);
+		).toBeValid(true);
 	});
 	test('Activity invalid', () => {
 		expect(
@@ -70,20 +68,20 @@ describe('Activity', () => {
 				exercise: '2',
 				duration: 0
 			})
-		).isValid(false);
-		expect(validate_activity(null)).isValid(false);
+		).toBeValid(false);
+		expect(validate_activity(null)).toBeValid(false);
 	});
 });
 
-describe.skip('Set', () => {
+describe('Set', () => {
 	test('Set invalid', () => {
-		expect(validate_set(null)).toBe(false);
+		expect(validate_set(null)).toBeValid(false);
 		expect(
 			validate_set({
 				rest: {},
 				duration: 20
 			})
-		).toBe(false);
+		).toBeValid(false);
 		expect(
 			validate_set([
 				{
@@ -92,10 +90,10 @@ describe.skip('Set', () => {
 				}
 			]),
 			'Nested Activity'
-		).toBe(false);
+		).toBeValid(false);
 	});
 	test('Set valid', () => {
-		expect(validate_set([])).toBe(true);
+		expect(validate_set([])).toBeValid(true);
 		expect(
 			validate_set([
 				{
@@ -103,47 +101,36 @@ describe.skip('Set', () => {
 					duration: 20
 				}
 			])
-		).toBe(true);
+		).toBeValid(true);
 	});
 	test('Set path', () => {
-		/** @type {Validation<Set>[]} */
-		const issues = [];
-		const is_valid = validate_set(
-			[
-				{
-					rest: {},
-					duration: -20
-				}
-			],
-			(iss) => issues.push(...iss)
-		);
-		expect(is_valid).toBe(false);
-		expect(issues).toHaveLength(1);
-		expect(issues[0].path).toEqual([0, 'duration']);
+		const is_valid = validate_set([
+			{
+				rest: {},
+				duration: -20
+			}
+		]);
+		expect(is_valid).toBeValid(false);
+		expect(is_valid.validation.issues()).toHaveLength(1);
+		expect(is_valid.validation.issues()[0].path).toEqual([0, 'duration']);
 	});
 	test('Set path', () => {
-		/** @type {Validation<Set>[]} */
-		const issues = [];
-		const is_valid = validate_set(
-			[
-				{
-					exercise: {
-						name: '-', // Too short
-						label: 'push-up',
-						description: null,
-						instructions: null,
-						alternatives: null
-					},
-					duration: -20
-				}
-			],
-			(iss) => issues.push(...iss)
-		);
-		expect(is_valid).toBe(false);
-		expect(issues.length > 1).toBe(true);
-		// TODO: The order here feels very brittle
-		expect(issues[0].path).toEqual([0, 'exercise', 'name']);
-		expect(issues[1].path).toEqual([0, 'duration']);
+		const is_valid = validate_set([
+			{
+				exercise: {
+					name: '-', // Too short
+					label: 'push-up',
+					description: null,
+					instructions: null,
+					alternatives: null
+				},
+				duration: -20
+			}
+		]);
+		expect(is_valid).toBeValid(false);
+		expect(is_valid.validation.issues().length > 1).toBe(true);
+		expect(is_valid.validation.get(0).path).toEqual([0, 'exercise', 'name']);
+		expect(is_valid.validation.get(1).path).toEqual([0, 'duration']);
 	});
 });
 
@@ -158,7 +145,7 @@ describe('Exercise', () => {
 				instructions: null,
 				alternatives: null
 			})
-		).isValid(true);
+		).toBeValid(true);
 		expect(
 			validate_exercise({
 				exercise: '1',
@@ -185,10 +172,10 @@ describe('Exercise', () => {
 					}
 				]
 			})
-		).isValid(true);
+		).toBeValid(true);
 	});
 	test('Exercise invalid', () => {
-		expect(validate_exercise(null)).isValid(false);
+		expect(validate_exercise(null)).toBeValid(false);
 		expect(
 			validate_exercise({
 				exercise: '1',
@@ -199,9 +186,9 @@ describe('Exercise', () => {
 				alternatives: null
 			}),
 			'.name too short'
-		).isValid(false);
+		).toBeValid(false);
 	});
-	test.skip('Nested paths', () => {
+	test('Nested paths', () => {
 		/** @type {Validation<Exercise>[]} */
 		const issues = [];
 		const is_valid = validate_exercise({
@@ -212,11 +199,11 @@ describe('Exercise', () => {
 			instructions: null,
 			alternatives: null
 		});
-		expect(is_valid).toBe(false);
-		expect(issues).toHaveLength(1);
-		expect(issues[0].path).toEqual(['name']);
+		expect(is_valid).toBeValid(false);
+		expect(is_valid.validation.issues()).toHaveLength(1);
+		expect(is_valid.validation.get(0).path).toEqual(['name']);
 	});
-	test.skip('Multiple nested paths', () => {
+	test('Multiple nested paths', () => {
 		const is_valid = validate_exercise({
 			exercise: '1',
 			name: 'P',
@@ -225,10 +212,10 @@ describe('Exercise', () => {
 			instructions: null,
 			alternatives: [3]
 		});
-		expect(is_valid).toBe(false);
-		// expect(issues).toHaveLength(2);
-		// expect(issues[0].path).toEqual(['name']);
-		// expect(issues[1].path).toEqual(['alternatives', 0]);
+		expect(is_valid).toBeValid(false);
+		expect(is_valid.validation.issues()).toHaveLength(2);
+		expect(is_valid.validation.get(0).path).toEqual(['name']);
+		expect(is_valid.validation.get(1).path).toEqual(['alternatives', 0]);
 	});
 	test('Recursive exercises', () => {
 		const is_valid = validate_exercise({
@@ -257,7 +244,7 @@ describe('Exercise', () => {
 				}
 			]
 		});
-		expect(is_valid).isValid(false);
+		expect(is_valid).toBeValid(false);
 		expect(is_valid.validation).toHaveLength(3);
 		expect(is_valid.validation.get(0).path).toEqual(['name']);
 		expect(is_valid.validation.get(1).path).toEqual(['alternatives', 0, 'name']);
