@@ -22,6 +22,20 @@ import { Validation, is_invalid } from '$lib/validation';
 /**
  *
  * @param {unknown} value
+ * @param {number} [min]
+ * @returns (valus is string)
+ */
+function is_string(value, min) {
+	if (undefined === value) return false;
+	if ('string' === typeof value) {
+		return value.trim().length >= (min ?? 0);
+	}
+	return false;
+}
+
+/**
+ *
+ * @param {unknown} value
  * @returns {MaybeInvalid<unknown, Workout, 'workout'>}
  */
 export function validate_workout(value) {
@@ -31,36 +45,44 @@ export function validate_workout(value) {
 
 	// Existence
 	if ('object' === typeof workout && null !== workout) {
-		// Property type
+		let _name; // Typed dependency in .label
 		if ('name' in workout && 'string' === typeof workout.name) {
-			// Property constraints
-			if (3 > workout.name.length) {
-				validation.add('Workout name must at least 3 letters.', 'name');
-			}
-		} else {
-			validation.add('Workout name must be text', 'name');
-		}
-		// Property type
-		if ('label' in workout && 'string' === typeof workout.label) {
-			// Property constraints
-			if (3 > workout.label.length) {
-				validation.add('Workout label must at least 3 letters.', 'label');
+			if (workout.name.length < 3) {
+				validation.add('Name must at least 3 letters.', 'name');
 			} else {
-				if ('new' === workout.label) {
-					validation.add('Exercise label cannot be “new”.', 'label');
-				}
+				_name = workout.name = workout.name.trim();
 			}
 		} else {
-			validation.add('Workout label must be text', 'label');
+			validation.add('Name must be text.', 'name');
 		}
-		// Property type
+		if ('label' in workout) {
+			if (null === workout.label || '' === workout.label) {
+				if (_name) workout.label = slug(_name);
+				else validation.add('Label depends on a valid name');
+			}
+			if ('string' === typeof workout.label) {
+				if (workout.label.length < 3) {
+					validation.add('Label must at least 3 letters.', 'label');
+				} else {
+					if ('new' === workout.label.toLowerCase()) {
+						validation.add('Label cannot be “new”.', 'label');
+					} else {
+						workout.label = workout.label.trim();
+					}
+				}
+			} else {
+				validation.add('Label must be text.');
+			}
+		} else {
+			validation.add('Label must exist.', 'label');
+		}
 		if (
 			'description' in workout &&
 			('string' === typeof workout.description || null === workout.description)
 		) {
 			// No constraints
 		} else {
-			validation.add('Workout description invalid', 'description');
+			validation.add('Description must be text.', 'description');
 		}
 		if ('sets' in workout && Array.isArray(workout.sets)) {
 			for (let s = 0; s < workout.sets.length; s++) {
@@ -276,4 +298,28 @@ export function validate_exercise(value) {
  */
 export function new_id() {
 	return /** @type {ID} */ (crypto.randomUUID());
+}
+
+/**
+ * Turns a string into a URL-ready slug
+ *
+ * @param {string} name
+ * @returns {string}
+ */
+export function slug(name) {
+	const maxLength = 80;
+	let len = 0,
+		index = 0,
+		slug = '';
+	// https://stackoverflow.com/a/66721429
+	const tokens = name.split(/[^\p{L}\p{N}]+/gu);
+	while (len < maxLength && index < tokens.length) {
+		len += tokens[index].length;
+		if (tokens[index].length > 0) {
+			slug += (index > 0 ? '-' : '') + tokens[index++].toLowerCase();
+		} else {
+			index++;
+		}
+	}
+	return slug;
 }

@@ -31,7 +31,7 @@ export class Validation {
 	/**
 	 *
 	 * @param {Validation<unknown>} validation
-	 * @param {Path} [base_path]
+	 * @param {Path} [base_path = []]
 	 * @returns {Validation<Out>}
 	 */
 	merge(validation, base_path = []) {
@@ -60,23 +60,23 @@ export class Validation {
 	/**
 	 *
 	 * @param {number} index
-	 * @returns {Issue | null}
+	 * @returns {Issue | undefined}
 	 */
 	get(index) {
-		if (index < 0 || index >= this.#issues.length) return null;
+		if (index < 0 || index >= this.#issues.length) return undefined;
 		return this.#issues[index];
 	}
 	/**
 	 *
 	 * @param {Path} [path]
-	 * @returns {Issue | null}
+	 * @returns {Issue | undefined}
 	 */
 	first(path) {
-		return this.issues(path)[0] ?? null;
+		return this.issues(path)[0];
 	}
 	/**
 	 *
-	 * @param {Path} path
+	 * @param {Path} [path]
 	 * @returns {boolean}
 	 */
 	has(path) {
@@ -98,7 +98,7 @@ export class Validation {
 		return new Validation().merge(json);
 	}
 	is_valid() {
-		return 0 === this.length;
+		return !this.has();
 	}
 	[Symbol.iterator]() {
 		return this.#issues[Symbol.iterator]();
