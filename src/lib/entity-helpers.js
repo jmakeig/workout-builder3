@@ -196,27 +196,36 @@ export function validate_exercise(value) {
 
 	// Existence
 	if ('object' === typeof exercise && null !== exercise) {
-		// Property type
+		let _name; // Typed dependency in .label
 		if ('name' in exercise && 'string' === typeof exercise.name) {
-			// Property constraints
-			if (3 > exercise.name.length) {
-				validation.add('Exercise name must at least 3 letters.', 'name');
-			}
-		} else {
-			validation.add('Exercise name must be text', 'name');
-		}
-		// Property type
-		if ('label' in exercise && 'string' === typeof exercise.label) {
-			// Property constraints
-			if (3 > exercise.label.length) {
-				validation.add('Exercise label must at least 3 letters.', 'label');
+			if (exercise.name.length < 3) {
+				validation.add('Name must at least 3 letters.', 'name');
 			} else {
-				if ('new' === exercise.label) {
-					validation.add(`Exercise label cannot be “new”.`, 'label');
-				}
+				_name = exercise.name = exercise.name.trim();
 			}
 		} else {
-			validation.add('Exercise label must be text', 'label');
+			validation.add('Name must be text.', 'name');
+		}
+		if ('label' in exercise) {
+			if (null === exercise.label || '' === exercise.label) {
+				if (_name) exercise.label = slug(_name);
+				else validation.add('Label depends on a valid name');
+			}
+			if ('string' === typeof exercise.label) {
+				if (exercise.label.length < 3) {
+					validation.add('Label must at least 3 letters.', 'label');
+				} else {
+					if ('new' === exercise.label.toLowerCase()) {
+						validation.add('Label cannot be “new”.', 'label');
+					} else {
+						exercise.label = exercise.label.trim();
+					}
+				}
+			} else {
+				validation.add('Label must be text.');
+			}
+		} else {
+			validation.add('Label must exist.', 'label');
 		}
 		// Property type
 		if ('description' in exercise) {
