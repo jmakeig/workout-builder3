@@ -37,7 +37,7 @@ type AtLeastOne<T> = {
 	[K in keyof T]-?: Pick<T, K> & Partial<T>;
 }[keyof T];
 
-type Locale = 'en' | 'fr';
+// type Locale = 'en' | 'fr';
 /**
  * Allows you to reference any key of `Entity` by name,
  * as well as an optional offset for `Array` properties.
@@ -46,22 +46,22 @@ type Locale = 'en' | 'fr';
  * Forable<{a: string; b: Array<number>}> // 'a' | 'b' | 'b[#]', where # is any number
  */
 
-type Forable<Entity> =
-	| `${string & keyof Entity}`
-	| `${string & keyof PickMatch<Entity, Array<unknown>>}[${number}]`;
+// type Forable<Entity> =
+// 	| `${string & keyof Entity}`
+// 	| `${string & keyof PickMatch<Entity, Array<unknown>>}[${number}]`;
 /**
  * A validation message. Typical usage is for communicating business rule violations
  * back to users. `for` can optionally reference a property in the entity being validated by name,
  * e.g. `'id'` or `'workloads[3]'`.
  */
 
-export type Validation<Entity = unknown> = {
-	readonly message: string | AtLeastOne<{ [K in Locale]: string }>;
-	// for?: Forable<Entity>;
-	readonly path?: Path;
-};
+// export type Validation<Entity = unknown> = {
+// 	readonly message: string | AtLeastOne<{ [K in Locale]: string }>;
+// 	// for?: Forable<Entity>;
+// 	readonly path?: Path;
+// };
 
-export type Path = ReadonlyArray<PropertyKey>;
+// export type Path = ReadonlyArray<PropertyKey>;
 
 /**
  * A response to an API call. A response can either be the plain output entity, `Out`,
@@ -74,13 +74,13 @@ export type Path = ReadonlyArray<PropertyKey>;
  * Validation is an expected part of the API contract and thus is modeled in the
  * responses from API calls. Thrown errors should represent exceptional circumstances.
  */
-export type MaybeInvalid<In, Out, Prop extends string = 'input'> = Out | Invalid<In, Out, Prop>;
+// export type MaybeInvalid<In, Out, Prop extends string = 'input'> = Out | Invalid<In, Out, Prop>;
 
 /**
  * A way to communicate a business rule violation in an API call.
  */
-export type Invalid<In, Out, Prop extends string = 'input'> = {
-	validations: Array<Validation<Out>>;
-} & {
-	[property in Prop]: In;
-};
+// export type Invalid<In, Out, Prop extends string = 'input'> = {
+// 	validations: Array<Validation<Out>>;
+// } & {
+// 	[property in Prop]: In;
+// };

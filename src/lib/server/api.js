@@ -1,20 +1,16 @@
-import { is_valid_exercise, is_valid_workout, new_id } from '$lib/entity-helpers';
-import { has } from '$lib/validation';
+import { validate_exercise, validate_workout, new_id } from '$lib/entity-helpers';
+import { is_invalid } from '$lib/validation';
 
 /** @typedef {import('$lib/entities').ID} ID */
 /** @typedef {import('$lib/entities').Exercise} Exercise */
 /** @typedef {import('$lib/entities').PendingExercise} PendingExercise */
 /** @typedef {import('$lib/entities').Workout} Workout */
 /** @typedef {import('$lib/entities').PendingWorkout} PendingWorkout */
-/**
- * @template Entity
- * @typedef {import('$lib/util').Validation<Entity>} Validation
- */
 
 /**
  * @template In, Out
  * @template {string} [Prop = "input"]
- * @typedef {import('$lib/util').MaybeInvalid<In, Out, Prop>} MaybeInvalid
+ * @typedef {import('$lib/validation-types').MaybeInvalid<In, Out, Prop>} MaybeInvalid
  */
 
 /** @type {Workout[]} */
@@ -53,16 +49,14 @@ const exercises = [
  * @returns {Promise<MaybeInvalid<PendingExercise, Exercise, 'exercise'>>}
  */
 export async function create_exercise(input) {
-	/** @type {Validation<Exercise>[]} */
-	const validations = [];
+	const exercise = validate_exercise({ ...input, exercise: new_id() });
 
-	const exercise = { ...input, exercise: new_id() };
-	if (is_valid_exercise(exercise)) {
-		exercises.push(exercise);
-		return Promise.resolve(exercise);
+	if (is_invalid(exercise)) {
+		return Promise.resolve({ exercise: input, validation: exercise.validation });
 	}
 
-	return { exercise, validations };
+	exercises.push(exercise);
+	return Promise.resolve(exercise);
 }
 
 /**
@@ -70,18 +64,18 @@ export async function create_exercise(input) {
  * @returns {Promise<MaybeInvalid<PendingWorkout, Workout, 'workout'>>}
  */
 export async function create_workout(input) {
-	const workout = {
+	const workout = validate_workout({
 		...input,
 		workout: new_id(),
 		sets: input.sets || [] // Assumes that the initial creation does not set this
-	};
-	/** @type {Validation<Workout>[]} */
-	const validations = [];
-	if (is_valid_workout(workout, (issues) => validations.push(...issues))) {
-		workouts.push(workout);
-		return Promise.resolve(workout);
+	});
+
+	if (is_invalid(workout)) {
+		return Promise.resolve({ workout: input, validation: workout.validation });
 	}
-	return { workout, validations };
+
+	workouts.push(workout);
+	return Promise.resolve(workout);
 }
 
 /**

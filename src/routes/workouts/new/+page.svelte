@@ -1,14 +1,12 @@
 <script>
-	import { first, has } from '$lib/validation';
-
 	/** @type {{ data: import('./$types').PageData, form: import('./$types').ActionData }} */
 	let { data, form } = $props();
 </script>
 
 <h1>Create New Workout</h1>
 
-{#if form?.validations}
-	<p>{first(form.validations)?.message}</p>
+{#if form?.validation}
+	<p>{form.validation?.first()?.message}</p>
 {:else if form}
 	<p>Success!</p>
 	<pre>{JSON.stringify(form.workout, null, 2)}</pre>
@@ -46,12 +44,12 @@
 				name="name"
 				value={form?.workout.name}
 				placeholder={'\u200B'}
-				aria-invalid={has(form?.validations, 'name')}
-				aria-errormessage={has(form?.validations, 'name') ? `name-error` : undefined}
+				aria-invalid={form?.validation.has(['name'])}
+				aria-errormessage={form?.validation.has(['name']) ? `name-error` : undefined}
 			/>
-			{#if has(form?.validations, 'name')}
+			{#if form?.validation.has(['name'])}
 				<p class="validation" id="name-error" aria-live="assertive">
-					{first(form?.validations, 'name')?.message}
+					{form?.validation.first(['name'])?.message}
 				</p>
 			{/if}
 		</div>

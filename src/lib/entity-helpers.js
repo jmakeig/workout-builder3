@@ -1,9 +1,4 @@
 /**
- * @template Input, Output
- * @typedef {import('@standard-schema/spec').StandardSchemaV1<Input, Output>} StandardSchemaV1
- */
-
-/**
  * @typedef {import('$lib/entities').ID} ID
  * @typedef {import('$lib/entities').Workout} Workout
  * @typedef {import('$lib/entities').PendingWorkout} PendingWorkout
@@ -13,239 +8,258 @@
  */
 
 /**
- * @template Entity
- * @typedef {import('$lib/util').Validation<Entity>} Validation
+ * @typedef {import('$lib/validation').Path} Path
  */
 
 /**
- * @typedef {import('$lib/util').Path} Path
+ * @template In, Out
+ * @template {string} [Prop = "input"]
+ * @typedef {import('$lib/validation-types').MaybeInvalid<In, Out, Prop>} MaybeInvalid
  */
+
+import { Validation, is_invalid } from '$lib/validation';
 
 /**
  *
  * @param {unknown} value
- * @param {(issues: Validation<Workout>[]) => void} [on_validate]
- * @param {Path} [base_path = []]
- * @returns {value is Workout}
+ * @returns {MaybeInvalid<unknown, Workout, 'workout'>}
  */
-export function is_valid_workout(value, on_validate = (issues) => {}, base_path = []) {
-	/** @type {Validation<Workout>[]} */
-	const issues = [];
+export function validate_workout(value) {
+	/** @type {Validation<Workout>} */
+	const validation = new Validation();
+	const workout = structuredClone(value);
 
 	// Existence
-	if ('object' === typeof value && null !== value) {
+	if ('object' === typeof workout && null !== workout) {
 		// Property type
-		if ('name' in value && 'string' === typeof value.name) {
+		if ('name' in workout && 'string' === typeof workout.name) {
 			// Property constraints
-			if (3 > value.name.length) {
-				issues.push({
-					message: 'Workout name must at least 3 letters.',
-					path: [...base_path, 'name']
-				});
+			if (3 > workout.name.length) {
+				validation.add('Workout name must at least 3 letters.', 'name');
 			}
 		} else {
-			issues.push({ message: 'Workout name must be text', path: [...base_path, 'name'] });
+			validation.add('Workout name must be text', 'name');
 		}
 		// Property type
-		if ('label' in value && 'string' === typeof value.label) {
+		if ('label' in workout && 'string' === typeof workout.label) {
 			// Property constraints
-			if (3 > value.label.length) {
-				issues.push({
-					message: 'Workout label must at least 3 letters.',
-					path: [...base_path, 'label']
-				});
+			if (3 > workout.label.length) {
+				validation.add('Workout label must at least 3 letters.', 'label');
+			} else {
+				if ('new' === workout.label) {
+					validation.add('Exercise label cannot be “new”.', 'label');
+				}
 			}
 		} else {
-			issues.push({ message: 'Workout label must be text', path: [...base_path, 'label'] });
+			validation.add('Workout label must be text', 'label');
 		}
 		// Property type
 		if (
-			'description' in value &&
-			('string' === typeof value.description || null === value.description)
+			'description' in workout &&
+			('string' === typeof workout.description || null === workout.description)
 		) {
 			// No constraints
 		} else {
-			issues.push({ message: 'Workout description invalid', path: [...base_path, 'description'] });
+			validation.add('Workout description invalid', 'description');
 		}
-		if ('sets' in value && Array.isArray(value.sets)) {
-			value.sets.forEach((set, s) =>
-				is_valid_set(set, (iss) => issues.push(...iss), [...base_path, 'sets', s])
-			);
+		if ('sets' in workout && Array.isArray(workout.sets)) {
+			for (let s = 0; s < workout.sets.length; s++) {
+				const set = validate_set(workout.sets[s]);
+				if (is_invalid(set)) {
+					validation.merge(set.validation, ['sets', s]);
+				} else {
+					workout.sets[s] = set;
+				}
+			}
 		} else {
-			issues.push({ message: 'Workout sets must exist.', path: [...base_path, 'sets'] });
+			validation.add('Workout sets must exist.', 'sets');
 		}
 	} else {
-		issues.push({ message: 'Workout must exist.', path: [...base_path] });
+		validation.add('Workout must exist.');
 	}
-
-	if (on_validate) on_validate(issues);
-	return 0 === issues.length;
+	if (validation.is_valid()) return /** @type {Workout} */ (workout);
+	return {
+		workout: value,
+		validation
+	};
 }
+
 /**
+ *
  * @param {unknown} value
- * @param {(issues: Validation<Set>[]) => void} [on_validate]
- * @param {Path} [base_path = []]
- * @returns {value is Set}
+ * @returns {MaybeInvalid<unknown, Set, 'set'>}
  */
-export function is_valid_set(value, on_validate = (issues) => {}, base_path = []) {
-	/** @type {Validation<Set>[]} */
-	const issues = [];
+export function validate_set(value) {
+	/** @type {Validation<Set>} */
+	const validation = new Validation();
+	const set = structuredClone(value);
 
 	// Existence
-	if ('object' === typeof value && null !== value && Array.isArray(value)) {
-		value.forEach((activity, a) =>
-			is_valid_activity(activity, (iss) => issues.push(...iss), [...base_path, a])
-		);
+	if ('object' === typeof set && null !== set && Array.isArray(set)) {
+		for (let a = 0; a < set.length; a++) {
+			const activity = validate_activity(set[a]);
+			if (is_invalid(activity)) {
+				validation.merge(activity.validation, [a]);
+			} else {
+				set[a] = activity;
+			}
+		}
 	} else {
-		issues.push({ message: 'Workout must exist.', path: [...base_path] });
+		validation.add('Set must exist.');
 	}
 
-	if (on_validate) on_validate(issues);
-	return 0 === issues.length;
+	if (validation.is_valid()) return /** @type {Set} */ (set);
+	return {
+		set: value,
+		validation
+	};
 }
 
 /**
  * @param {unknown} value Probably a PendingActivity
- * @param {(issues: Validation<Activity>[]) => void} [on_validate]
- * @param {Path} [base_path = []]
- * @returns {value is Activity}
+ * @returns {MaybeInvalid<unknown, Activity, 'activity'>}
  */
-export function is_valid_activity(value, on_validate = (issues) => {}, base_path = []) {
-	/** @type {Validation<Activity>[]} */
-	const issues = [];
+export function validate_activity(value) {
+	/** @type {Validation<Activity>} */
+	const validation = new Validation();
+	const activity = structuredClone(value);
 
 	// Existence
-	if ('object' === typeof value && null !== value) {
-		if ('exercise' in value || 'rest' in value) {
-			if ('exercise' in value) {
-				is_valid_exercise(value.exercise, (iss) => issues.push(...iss), [...base_path, 'exercise']);
+	if ('object' === typeof activity && null !== activity) {
+		if ('exercise' in activity || 'rest' in activity) {
+			if ('exercise' in activity) {
+				const exercise = validate_exercise(activity.exercise);
+				if (is_invalid(exercise)) {
+					validation.merge(exercise.validation, ['exercise']);
+				} else {
+					activity.exercise = exercise;
+				}
 			}
-			if ('rest' in value) {
+			if ('rest' in activity) {
 				// No constraints
 			}
 			if (
-				'duration' in value &&
-				'number' === typeof value.duration &&
-				!Number.isNaN(value.duration)
+				'duration' in activity &&
+				'number' === typeof activity.duration &&
+				!Number.isNaN(activity.duration)
 			) {
-				if (0 >= value.duration) {
-					issues.push({ message: '', path: [...base_path, 'duration'] });
+				if (0 >= activity.duration) {
+					validation.add('Activity duration must be positive.', 'duration');
 				}
 			} else {
-				issues.push({
-					message: 'Activity duration must be a number.',
-					path: [...base_path, 'duration']
-				});
+				validation.add('Activity duration must be a number.', 'duration');
 			}
 		} else {
-			issues.push({ message: 'Activity must be exercise or rest.', path: [...base_path] });
+			validation.add('Activity must be exercise or rest.', 'activity');
 		}
 	} else {
-		issues.push({ message: 'Activity must exist.', path: [...base_path] });
+		validation.add('Activity must exist.');
 	}
 
-	if (on_validate) on_validate(issues);
-	return 0 === issues.length;
+	if (validation.is_valid()) return /** @type {Activity} */ (activity);
+	return {
+		activity: activity,
+		validation
+	};
 }
 
 /**
- * @param {unknown} value
- * @param {(issues: Validation<Exercise>[]) => void} [on_validate]
- * @param {Path} [base_path = []]
- * @returns {value is Exercise}
+ * @param {unknown} value Probably a PendingExercise
+ * @returns {MaybeInvalid<unknown, Exercise, 'exercise'>}
  */
-export function is_valid_exercise(value, on_validate = (issues) => {}, base_path = []) {
-	/** @type {Validation<Exercise>[]} */
-	const issues = [];
+export function validate_exercise(value) {
+	/** @type {Validation<Exercise>} */
+	const validation = new Validation();
+	const exercise = structuredClone(value);
 
 	// Existence
-	if ('object' === typeof value && null !== value) {
+	if ('object' === typeof exercise && null !== exercise) {
 		// Property type
-		if ('name' in value && 'string' === typeof value.name) {
+		if ('name' in exercise && 'string' === typeof exercise.name) {
 			// Property constraints
-			if (3 > value.name.length) {
-				issues.push({
-					message: 'Exercise name must at least 3 letters.',
-					path: [...base_path, 'name']
-				});
+			if (3 > exercise.name.length) {
+				validation.add('Exercise name must at least 3 letters.', 'name');
 			}
 		} else {
-			issues.push({ message: 'Exercise name must be text', path: [...base_path, 'name'] });
+			validation.add('Exercise name must be text', 'name');
 		}
 		// Property type
-		if ('label' in value && 'string' === typeof value.label) {
+		if ('label' in exercise && 'string' === typeof exercise.label) {
 			// Property constraints
-			if (3 > value.label.length) {
-				issues.push({
-					message: 'Exercise label must at least 3 letters.',
-					path: [...base_path, 'label']
-				});
+			if (3 > exercise.label.length) {
+				validation.add('Exercise label must at least 3 letters.', 'label');
+			} else {
+				if ('new' === exercise.label) {
+					validation.add(`Exercise label cannot be “new”.`, 'label');
+				}
 			}
 		} else {
-			issues.push({ message: 'Exercise label must be text', path: [...base_path, 'label'] });
+			validation.add('Exercise label must be text', 'label');
 		}
 		// Property type
 		if (
-			'description' in value &&
-			('string' === typeof value.description || null === value.description)
+			'description' in exercise &&
+			('string' === typeof exercise.description || null === exercise.description)
 		) {
 			// No constraints
 		} else {
-			issues.push({ message: 'Exercise description invalid', path: [...base_path, 'description'] });
+			validation.add('Exercise description invalid', 'description');
 		}
-		if ('instructions' in value) {
-			if (null === value.instructions) {
+		if ('instructions' in exercise) {
+			if (null === exercise.instructions) {
 				// OK
-			} else if (Array.isArray(value.instructions)) {
-				value.instructions.forEach((instruction, i) => {
-					if ('string' !== typeof instruction) {
-						issues.push({
-							message: 'Exercise instruction must be text.',
-							path: [...base_path, 'instructions', i]
-						});
+			} else {
+				if ('string' === typeof exercise.instructions) {
+					// Parse and fall through
+					exercise.instructions = exercise.instructions.split('\n');
+				}
+				if (Array.isArray(exercise.instructions)) {
+					for (let i = 0; i < exercise.instructions.length; i++) {
+						if ('string' === typeof exercise.instructions[i]) {
+							exercise.instructions[i] = exercise.instructions[i].trim();
+						} else {
+							validation.add('Exercise instruction must be text.', ['instructions', i]);
+						}
 					}
-				});
-			} else {
-				issues.push({
-					message: 'Exercise instructions must exist.',
-					path: [...base_path, 'instructions']
-				});
+					exercise.instructions.forEach((instruction, i) => {
+						if ('string' !== typeof instruction) {
+							validation.add('Exercise instruction must be text.', ['instructions', i]);
+						}
+					});
+				} else {
+					validation.add('Exercise instructions must exist.', 'instructions');
+				}
 			}
 		} else {
-			issues.push({
-				message: 'Exercise instructions must exist.',
-				path: [...base_path, 'instructions']
-			});
+			validation.add('Exercise instructions must exist.', 'instructions');
 		}
-		if ('alternatives' in value) {
-			if (null === value.alternatives) {
+		if ('alternatives' in exercise) {
+			if (null === exercise.alternatives) {
 				// OK
-			} else if (Array.isArray(value.alternatives)) {
-				value.alternatives.forEach((alternative, a) =>
-					is_valid_exercise(alternative, (iss) => issues.push(...iss), [
-						...base_path,
-						'alternatives',
-						a
-					])
-				);
+			} else if (Array.isArray(exercise.alternatives)) {
+				for (let a = 0; a < exercise.alternatives.length; a++) {
+					const alternative = validate_exercise(exercise.alternatives[a]);
+					if (is_invalid(alternative)) {
+						validation.merge(alternative.validation, ['alternatives', a]);
+					} else {
+						exercise.alternatives[a] = alternative;
+					}
+				}
 			} else {
-				issues.push({
-					message: 'Alternatives can only be exercises.',
-					path: [...base_path, 'alternatives']
-				});
+				validation.add('Alternatives can only be exercises.', 'alternatives');
 			}
 		} else {
-			issues.push({
-				message: 'Exercise alternatives must exist.',
-				path: [...base_path, 'alternatives']
-			});
+			validation.add('Exercise alternatives must exist.', 'alternatives');
 		}
 	} else {
-		issues.push({ message: 'Workout must exist.', path: [...base_path] });
+		validation.add('Exercise must exist.');
 	}
 
-	if (on_validate) on_validate(issues);
-	return 0 === issues.length;
+	if (validation.is_valid()) return /** @type {Exercise} */ (exercise);
+	return {
+		exercise: value,
+		validation
+	};
 }
 
 /**

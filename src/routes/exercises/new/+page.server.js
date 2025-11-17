@@ -17,6 +17,7 @@ export const actions = {
 			Object.fromEntries(await request.formData())
 		);
 
+		console.log('exercise_input', exercise_input);
 		const exercise = await api.create_exercise(exercise_input);
 
 		// Careful with the params. The message sent back in the `form` or the `fail`

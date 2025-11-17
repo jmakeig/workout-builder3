@@ -1,98 +1,146 @@
+// https://stackblitz.com/edit/sveltejs-kit-template-default-b5zbxomg?file=src%2Flib%2FUser.svelte.js
+
 /**
- * @template In, Out
- * @template {string} [Prop = "input"]
- * @typedef {import('$lib/util').MaybeInvalid<In, Out, Prop>} MaybeInvalid
- */
-/**
- * @template In, Out
- * @template {string} [Prop = "input"]
- * @typedef {import('$lib/util').Invalid<In, Out, Prop>} InvalidResult
- */
-/**
- * @template Entity
- * @typedef {import("./util").Validation<Entity>} Validation
+ * @typedef {import('./validation-types').Issue} Issue
+ * @typedef {import('./validation-types').Path} Path
  */
 
 /**
- * @typedef {import('./util').Path} Path
+ * @template Out
+ */
+export class Validation {
+	/** @type {Issue[]} */
+	#issues = [];
+	/**
+	 * @param {Path} [base_path]
+	 * @param {Issue[]} [issues]
+	 */
+	constructor(base_path = [], issues = []) {
+		this.#issues = issues;
+	}
+	/**
+	 *
+	 * @param {Issue['message']} message
+	 * @param {PropertyKey | Path} [property]
+	 * @returns {Validation<Out>}
+	 */
+	add(message, property) {
+		console.log('Validation.add', message, property);
+		this.#issues.push({
+			message,
+			path: property ? [...(Array.isArray(property) ? property : [property])] : []
+		});
+		return this;
+	}
+	/**
+	 *
+	 * @param {Validation<unknown>} validation
+	 * @param {Path} [base_path]
+	 * @returns {Validation<Out>}
+	 */
+	merge(validation, base_path = []) {
+		for (const issue of validation) {
+			this.#issues.push({
+				message: issue.message,
+				path: [...base_path, ...(issue.path ?? [])]
+			});
+		}
+		return this;
+	}
+	/**
+	 * @param {Path} [path]
+	 * @returns {ReadonlyArray<Issue>}
+	 */
+	issues(path) {
+		if (undefined === path) return this.#issues;
+		return this.#issues.filter((issue) => {
+			if (path.length !== issue.path?.length) return false;
+			for (let i = 0; i < path.length; i++) {
+				if (path[i] !== issue.path?.[i]) return false;
+			}
+			return true;
+		});
+	}
+	/**
+	 *
+	 * @param {number} index
+	 * @returns {Issue | null}
+	 */
+	get(index) {
+		if (index < 0 || index >= this.#issues.length) return null;
+		return this.#issues[index];
+	}
+	/**
+	 *
+	 * @param {Path} [path]
+	 * @returns {Issue | null}
+	 */
+	first(path) {
+		return this.issues(path)[0] ?? null;
+	}
+	/**
+	 *
+	 * @param {Path} path
+	 * @returns {boolean}
+	 */
+	has(path) {
+		return this.issues(path).length > 0;
+	}
+	/**
+	 *
+	 * @returns {object}
+	 */
+	toJSON() {
+		return this.#issues;
+	}
+	/**
+	 *
+	 * @param {any} json
+	 * @returns {Validation<unknown>}
+	 */
+	static fromJSON(json) {
+		return new Validation([], json);
+	}
+	is_valid() {
+		return 0 === this.length;
+	}
+	[Symbol.iterator]() {
+		return this.#issues[Symbol.iterator]();
+	}
+	get length() {
+		return this.#issues.length;
+	}
+	toString() {
+		return this.#issues
+			.map((issue) => `${issue.message} (${issue.path ? issue.path.join(' > ') : ''})`)
+			.join('\n');
+	}
+}
+
+/**
+ * @template In, Out
+ * @template {string} [Prop = "input"]
+ * @typedef {import('$lib/validation-types').Invalid<In, Out, Prop>} Invalid
  */
 
 /**
- *
- * @param {MaybeInvalid<any, any, string>} result
- * @returns {result is InvalidResult<any, any, string>}
+ * @template In, Out
+ * @template {string} [Prop = "input"]
+ * @typedef {import('$lib/validation-types').MaybeInvalid<In, Out, Prop>} MaybeInvalid
+ */
+
+/**
+ * Checks whether a `MaybeInvalid` result is actually `Invalid`.
+ * @template In, Out
+ * @template {string} [Prop = "input"]
+ * @param {MaybeInvalid<In, Out, Prop>} result
+ * @returns {result is Invalid<In, Out, Prop>}
  */
 export function is_invalid(result) {
-	return 'validations' in Object(result);
-}
-
-/**
- * Filter by name.
- *
- * @template Entity
- * @param {Validation<Entity>[]} [validations]
- * @param {string} [name]
- * @returns {Validation<Entity>[] | undefined}
- */
-export function by(validations, name) {
-	if (undefined === validations) return undefined;
-	if (undefined === name) return validations;
-	return validations.filter((v) => name === path_for(v.path));
-}
-
-/**
- * @param {Path} [path]
- * @returns {string | undefined}
- */
-export function path_for(path) {
-	if (undefined === path) return undefined;
-	return path.reduce((/** @type {string} */ acc, segment) => {
-		if ('number' === typeof segment) {
-			return `${acc}[${segment}]`;
-		} else if ('symbol' === typeof segment) {
-			return `${acc}["${String(segment)}"]`;
-		} else {
-			if ('' === acc) {
-				return String(segment);
-			} else {
-				return `${acc}.${String(segment)}`;
-			}
-		}
-	}, '');
-}
-
-/**
- * Validations that don’t have a specific name,
- * i.e. that aren’t tied to a field.
- *
- * @template Entity
- * @param {Validation<Entity>[]} [validations]
- * @returns {Validation<Entity>[] | undefined}
- */
-export function general(validations) {
-	if (undefined === validations) return undefined;
-	return validations.filter((v) => undefined === v.path);
-}
-
-/**
- * @template Entity
- * @param {Validation<Entity>[]} [validations]
- * @param {string} [name]
- * @returns {Validation<Entity> | undefined}
- */
-export function first(validations, name) {
-	if (undefined === validations) return undefined;
-	const v = by(validations, name);
-	if (v) return v[0];
-	return undefined;
-}
-/**
- * Has at least one validation.
- * @template Entity
- * @param {Validation<Entity>[]} [validations]
- * @param {string} [name] Omitted will evaluate all validations, regardless of name
- * @returns {boolean}
- */
-export function has(validations, name) {
-	return Boolean(first(validations, name));
+	return (
+		'object' === typeof result &&
+		null !== result &&
+		'validation' in result &&
+		result.validation instanceof Validation
+	);
 }
