@@ -22,20 +22,6 @@ import { Validation, is_invalid } from '$lib/validation';
 /**
  *
  * @param {unknown} value
- * @param {number} [min]
- * @returns (valus is string)
- */
-function is_string(value, min) {
-	if (undefined === value) return false;
-	if ('string' === typeof value) {
-		return value.trim().length >= (min ?? 0);
-	}
-	return false;
-}
-
-/**
- *
- * @param {unknown} value
  * @returns {MaybeInvalid<unknown, Workout, 'workout'>}
  */
 export function validate_workout(value) {
