@@ -12,12 +12,8 @@ export class Validation {
 	/** @type {Issue[]} */
 	#issues = [];
 	/**
-	 * @param {Path} [base_path]
-	 * @param {Issue[]} [issues]
 	 */
-	constructor(base_path = [], issues = []) {
-		this.#issues = issues;
-	}
+	constructor() {}
 	/**
 	 *
 	 * @param {Issue['message']} message
@@ -99,7 +95,7 @@ export class Validation {
 	 * @returns {Validation<unknown>}
 	 */
 	static fromJSON(json) {
-		return new Validation([], json);
+		return new Validation().merge(json);
 	}
 	is_valid() {
 		return 0 === this.length;
