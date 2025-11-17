@@ -13,12 +13,15 @@ export async function load() {
 /** @satisfies {import('./$types').Actions} */
 export const actions = {
 	create: async ({ request }) => {
-		const exercise_input = /** @type {PendingExercise} */ (
-			Object.fromEntries(await request.formData())
-		);
+		const input =
+			/** @type {PendingExercise} */
+			({
+				...Object.fromEntries(await request.formData()),
+				alternatives: null
+			});
 
-		console.log('exercise_input', exercise_input);
-		const exercise = await api.create_exercise(exercise_input);
+		console.warn('Exercise.alternatives not implemented yet', input);
+		const exercise = await api.create_exercise(input);
 
 		// Careful with the params. The message sent back in the `form` or the `fail`
 		// needs to be an object with an `exercise` property (well, `Prop`).

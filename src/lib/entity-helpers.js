@@ -197,21 +197,26 @@ export function validate_exercise(value) {
 			validation.add('Exercise label must be text', 'label');
 		}
 		// Property type
-		if (
-			'description' in exercise &&
-			('string' === typeof exercise.description || null === exercise.description)
-		) {
-			// No constraints
+		if ('description' in exercise) {
+			if (null === exercise.description || '' === exercise.description) {
+				// OK
+				exercise.description = null;
+			} else if ('string' === typeof exercise.description) {
+				// OK
+				exercise.description = exercise.description.trim();
+			} else {
+				validation.add('Exercise description invalid', 'description');
+			}
 		} else {
 			validation.add('Exercise description invalid', 'description');
 		}
 		if ('instructions' in exercise) {
-			if (null === exercise.instructions) {
-				// OK
+			if (null === exercise.instructions || '' === exercise.instructions) {
+				exercise.instructions = null;
 			} else {
 				if ('string' === typeof exercise.instructions) {
 					// Parse and fall through
-					exercise.instructions = exercise.instructions.split('\n');
+					exercise.instructions = exercise.instructions.trim().split('\n');
 				}
 				if (Array.isArray(exercise.instructions)) {
 					for (let i = 0; i < exercise.instructions.length; i++) {
@@ -234,19 +239,22 @@ export function validate_exercise(value) {
 			validation.add('Exercise instructions must exist.', 'instructions');
 		}
 		if ('alternatives' in exercise) {
-			if (null === exercise.alternatives) {
+			if (null === exercise.alternatives || '' === exercise.alternatives) {
 				// OK
-			} else if (Array.isArray(exercise.alternatives)) {
-				for (let a = 0; a < exercise.alternatives.length; a++) {
-					const alternative = validate_exercise(exercise.alternatives[a]);
-					if (is_invalid(alternative)) {
-						validation.merge(alternative.validation, ['alternatives', a]);
-					} else {
-						exercise.alternatives[a] = alternative;
-					}
-				}
+				exercise.alternatives = null;
 			} else {
-				validation.add('Alternatives can only be exercises.', 'alternatives');
+				if (Array.isArray(exercise.alternatives)) {
+					for (let a = 0; a < exercise.alternatives.length; a++) {
+						const alternative = validate_exercise(exercise.alternatives[a]);
+						if (is_invalid(alternative)) {
+							validation.merge(alternative.validation, ['alternatives', a]);
+						} else {
+							exercise.alternatives[a] = alternative;
+						}
+					}
+				} else {
+					validation.add('Alternatives can only be exercises.', 'alternatives');
+				}
 			}
 		} else {
 			validation.add('Exercise alternatives must exist.', 'alternatives');

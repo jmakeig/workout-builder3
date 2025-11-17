@@ -33,6 +33,13 @@
 		<textarea name="instructions">{form?.exercise.instructions}</textarea>
 	</div>
 
+	<div class="control">
+		<label for="alternatives">Alternatives:</label>
+		<ul>
+			<li><input type="checkbox" name="alternatives" value="push-up" /> Push-up</li>
+		</ul>
+	</div>
+
 	<div class="control actions">
 		<button type="submit" class="default">Save</button>
 		<button>Cancel</button>
