@@ -71,14 +71,7 @@ export function validate_workout(value) {
 			validation.add('Description must be text.', 'description');
 		}
 		if ('sets' in workout && Array.isArray(workout.sets)) {
-			for (let s = 0; s < workout.sets.length; s++) {
-				const set = validate_set(workout.sets[s]);
-				if (is_invalid(set)) {
-					validation.merge(set.validation, ['sets', s]);
-				} else {
-					workout.sets[s] = set;
-				}
-			}
+			workout.sets = validation.collect(workout.sets, validate_set, ['sets']);
 		} else {
 			validation.add('Workout sets must exist.', 'sets');
 		}
@@ -100,18 +93,20 @@ export function validate_workout(value) {
 export function validate_set(value) {
 	/** @type {Validation<Set>} */
 	const validation = new Validation();
-	const set = structuredClone(value);
+	// const set = structuredClone(value);
+	let set = structuredClone(value);
 
 	// Existence
 	if ('object' === typeof set && null !== set && Array.isArray(set)) {
-		for (let a = 0; a < set.length; a++) {
-			const activity = validate_activity(set[a]);
-			if (is_invalid(activity)) {
-				validation.merge(activity.validation, [a]);
-			} else {
-				set[a] = activity;
-			}
-		}
+		// for (let a = 0; a < set.length; a++) {
+		// 	const activity = validate_activity(set[a]);
+		// 	if (is_invalid(activity)) {
+		// 		validation.merge(activity.validation, [a]);
+		// 	} else {
+		// 		set[a] = activity;
+		// 	}
+		// }
+		set = validation.collect(set, validate_activity);
 	} else {
 		validation.add('Set must exist.');
 	}
@@ -261,14 +256,9 @@ export function validate_exercise(value) {
 				exercise.alternatives = null;
 			} else {
 				if (Array.isArray(exercise.alternatives)) {
-					for (let a = 0; a < exercise.alternatives.length; a++) {
-						const alternative = validate_exercise(exercise.alternatives[a]);
-						if (is_invalid(alternative)) {
-							validation.merge(alternative.validation, ['alternatives', a]);
-						} else {
-							exercise.alternatives[a] = alternative;
-						}
-					}
+					exercise.alternatives = validation.collect(exercise.alternatives, validate_exercise, [
+						'alternatives'
+					]);
 				} else {
 					validation.add('Alternatives can only be exercises.', 'alternatives');
 				}

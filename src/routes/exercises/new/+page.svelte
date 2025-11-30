@@ -6,7 +6,7 @@
 <h1>Create New Exercise</h1>
 
 {#if form?.validation}
-	<p>{form.validation?.first()?.message}</p>
+	<p>{form.validation.first()?.message}</p>
 {:else if form}
 	<p>Success!</p>
 	<pre>{JSON.stringify(form.exercise, null, 2)}</pre>

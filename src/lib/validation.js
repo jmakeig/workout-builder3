@@ -83,6 +83,35 @@ export class Validation {
 		return this.issues(path).length > 0;
 	}
 	/**
+	 * Equivalent to calling `validate` on each of the items in the `collection` and
+	 * then `merge` on any invalid results. Returns the original `collection` if _any_
+	 * of the items is invalid or a collection of the validated items if _all_ of them
+	 * are valid.
+	 *
+	 * TODO: Support other collection types besides `Array`.
+	 *
+	 * @template In, Out
+	 * @param {Array<In>} collection
+	 * @template {string} [Prop = "input"]
+	 * @param {(item: In) => MaybeInvalid<In, Out, Prop>} validate
+	 * @param {Path} [base_path = []]
+	 * @returns {Array<In | Out>}
+	 */
+	collect(collection, validate, base_path = []) {
+		let dirty = false;
+		const output = collection.map((item, index) => {
+			const result = validate(item);
+			if (is_invalid(result)) {
+				dirty = true;
+				this.merge(result.validation, [...base_path, index]);
+				return item;
+			}
+			return result;
+		});
+		if (dirty) return collection;
+		return output;
+	}
+	/**
 	 *
 	 * @returns {object}
 	 */
