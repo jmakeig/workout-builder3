@@ -43,6 +43,20 @@ button:read-only,
 fieldset:read-only {
 	background: var(--color-input-disabled);
 }
+/*
+<div class="control">
+	<label for="name">Name</label>
+	<div class="contents">
+		<input type="text" name="name" value={form?.exercise.name} placeholder={'\u200B'} />
+		<p class="helper">The name of the exercise</p>
+		{#if form?.validation?.has('name')}
+			<p class="validation" id="name-error" aria-live="assertive">
+				{form?.validation.first('name')?.message}
+			</p>
+		{/if}
+	</div>
+</div>
+*/
 form div.control {
 	display: flex;
 	gap: 1em 2em;
@@ -56,12 +70,13 @@ form .control .helper {
 	font-size: 0.9em;
 	color: var(--color-secondary);
 }
+.validation, 
 form .control .validation {
 	color: var(--color-error);
 	font-weight: bolder;
 }
-form .control.invalid input,
-form .control.invalid textarea {
+form .control input:invalid,
+form .control textarea:invalid {
 	background-color: var(--color-error-secondary);
 }
 
