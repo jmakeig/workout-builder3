@@ -17,15 +17,13 @@ export const actions = {
 			/** @type {PendingExercise} */
 			({
 				...Object.fromEntries(await request.formData()),
-				alternatives: null
+				alternatives: console.warn('Exercise.alternatives not implemented yet') ?? null
 			});
-
-		console.warn('Exercise.alternatives not implemented yet', input);
 		const exercise = await api.create_exercise(input);
 
 		// Careful with the params. The message sent back in the `form` or the `fail`
 		// needs to be an object with an `exercise` property (well, `Prop`).
-		if (is_invalid(exercise)) return fail(400, exercise);
+		if (is_invalid(exercise)) return fail(422, exercise);
 		return { exercise };
 	}
 };
