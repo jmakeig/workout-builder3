@@ -44,15 +44,16 @@ export class Validation {
 		return this;
 	}
 	/**
-	 * @param {Path} [path]
+	 * @param {Path | string} [path]
 	 * @returns {ReadonlyArray<Issue>}
 	 */
 	issues(path) {
 		if (undefined === path) return this.#issues;
+		const _path = 'string' === typeof path ? [path] : path;
 		return this.#issues.filter((issue) => {
-			if (path.length !== issue.path?.length) return false;
-			for (let i = 0; i < path.length; i++) {
-				if (path[i] !== issue.path?.[i]) return false;
+			if (_path.length !== issue.path?.length) return false;
+			for (let i = 0; i < _path.length; i++) {
+				if (_path[i] !== issue.path?.[i]) return false;
 			}
 			return true;
 		});
@@ -68,7 +69,7 @@ export class Validation {
 	}
 	/**
 	 *
-	 * @param {Path} [path]
+	 * @param {Path | string} [path]
 	 * @returns {Issue | undefined}
 	 */
 	first(path) {
@@ -76,7 +77,7 @@ export class Validation {
 	}
 	/**
 	 *
-	 * @param {Path} [path]
+	 * @param {Path | string} [path]
 	 * @returns {boolean}
 	 */
 	has(path) {
