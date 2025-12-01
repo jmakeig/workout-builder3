@@ -9,7 +9,7 @@ type Locale = 'en' | 'fr';
  * e.g. `'id'` or `'workloads[3]'`.
  */
 export type Issue<Entity = unknown> = {
-	readonly message: string | AtLeastOne<{ [K in Locale]: string }>;
+	readonly message: string; // | AtLeastOne<{ [K in Locale]: string }>;
 	// for?: Forable<Entity>;
 	readonly path?: Path;
 };
