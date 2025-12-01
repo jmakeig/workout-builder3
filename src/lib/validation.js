@@ -21,7 +21,7 @@ export class Validation {
 	 * @returns {Validation<Out>}
 	 */
 	add(message, property) {
-		console.log('Validation.add', message, property);
+		// console.log('Validation.add', message, property);
 		this.#issues.push({
 			message,
 			path: property ? [...(Array.isArray(property) ? property : [property])] : []
@@ -49,7 +49,7 @@ export class Validation {
 	 */
 	issues(path) {
 		if (undefined === path) return this.#issues;
-		const _path = 'string' === typeof path ? [path] : path;
+		const _path = 'string' === typeof path ? ('' === path ? [] : [path]) : path;
 		return this.#issues.filter((issue) => {
 			if (_path.length !== issue.path?.length) return false;
 			for (let i = 0; i < _path.length; i++) {
