@@ -129,8 +129,8 @@ describe('Set', () => {
 		]);
 		expect(is_valid).toBeValid(false);
 		expect(is_valid.validation.issues().length > 1).toBe(true);
-		expect(is_valid.validation.get(0).path).toEqual([0, 'exercise', 'name']);
-		expect(is_valid.validation.get(1).path).toEqual([0, 'duration']);
+		expect(is_valid.validation.at(0).path).toEqual([0, 'exercise', 'name']);
+		expect(is_valid.validation.at(1).path).toEqual([0, 'duration']);
 	});
 });
 
@@ -201,7 +201,7 @@ describe('Exercise', () => {
 		});
 		expect(is_valid).toBeValid(false);
 		expect(is_valid.validation.issues()).toHaveLength(1);
-		expect(is_valid.validation.get(0).path).toEqual(['name']);
+		expect(is_valid.validation.at(0).path).toEqual(['name']);
 	});
 	test('Multiple nested paths', () => {
 		const is_valid = validate_exercise({
@@ -214,8 +214,8 @@ describe('Exercise', () => {
 		});
 		expect(is_valid).toBeValid(false);
 		expect(is_valid.validation.issues()).toHaveLength(2);
-		expect(is_valid.validation.get(0).path).toEqual(['name']);
-		expect(is_valid.validation.get(1).path).toEqual(['alternatives', 0]);
+		expect(is_valid.validation.at(0).path).toEqual(['name']);
+		expect(is_valid.validation.at(1).path).toEqual(['alternatives', 0]);
 	});
 	test('Recursive exercises', () => {
 		const is_valid = validate_exercise({
@@ -246,8 +246,8 @@ describe('Exercise', () => {
 		});
 		expect(is_valid).toBeValid(false);
 		expect(is_valid.validation).toHaveLength(3);
-		expect(is_valid.validation.get(0).path).toEqual(['name']);
-		expect(is_valid.validation.get(1).path).toEqual(['alternatives', 0, 'name']);
-		expect(is_valid.validation.get(2).path).toEqual(['alternatives', 0, 'alternatives', 0, 'name']);
+		expect(is_valid.validation.at(0).path).toEqual(['name']);
+		expect(is_valid.validation.at(1).path).toEqual(['alternatives', 0, 'name']);
+		expect(is_valid.validation.at(2).path).toEqual(['alternatives', 0, 'alternatives', 0, 'name']);
 	});
 });

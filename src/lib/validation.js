@@ -63,9 +63,9 @@ export class Validation {
 	 * @param {number} index
 	 * @returns {Issue | undefined}
 	 */
-	get(index) {
-		if (index < 0 || index >= this.#issues.length) return undefined;
-		return this.#issues[index];
+	at(index) {
+		// if (index < 0 || index >= this.#issues.length) return undefined;
+		return this.#issues.at(index);
 	}
 	/**
 	 *
