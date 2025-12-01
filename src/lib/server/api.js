@@ -44,6 +44,18 @@ const exercises = [
 ];
 
 /**
+ * @template T
+ * @param {T} value
+ * @param {number} [ms]
+ * @returns Promise<T>
+ */
+function delay(value, ms) {
+	return new Promise((resolve) => setTimeout(resolve, ms ?? Math.random() * 1000)).then(() =>
+		Promise.resolve(value)
+	);
+}
+
+/**
  *
  * @param {PendingExercise} input
  * @returns {Promise<MaybeInvalid<PendingExercise, Exercise, 'exercise'>>}
@@ -56,7 +68,7 @@ export async function create_exercise(input) {
 	}
 
 	exercises.push(exercise);
-	return Promise.resolve(exercise);
+	return delay(exercise);
 }
 
 /**
@@ -75,7 +87,7 @@ export async function create_workout(input) {
 	}
 
 	workouts.push(workout);
-	return Promise.resolve(workout);
+	return delay(workout);
 }
 
 /**
@@ -95,7 +107,7 @@ export async function get_workouts(params) {
 			return false;
 		});
 	}
-	return Promise.resolve(workouts);
+	return delay(workouts);
 }
 
 /**
@@ -105,14 +117,14 @@ export async function get_workouts(params) {
  */
 export async function find_workout(label) {
 	const result = workouts.find((workout) => workout.label === label);
-	return Promise.resolve(result || null);
+	return delay(result || null);
 }
 
 /**
  * @returns {Promise<Record<Exercise['label'], Exercise>>}
  */
 export async function get_exercises() {
-	return Promise.resolve(Object.fromEntries(exercises.map((e) => [e.label, e])));
+	return delay(Object.fromEntries(exercises.map((e) => [e.label, e])));
 }
 
 /**
@@ -122,5 +134,5 @@ export async function get_exercises() {
  */
 export async function find_exercise(label) {
 	const result = exercises.find((exercise) => exercise.label === label);
-	return Promise.resolve(result || null);
+	return delay(result || null);
 }
