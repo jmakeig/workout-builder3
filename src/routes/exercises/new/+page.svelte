@@ -5,7 +5,7 @@
 	/** @type {{ data: import('./$types').PageData, form: import('./$types').ActionData }} */
 	let { data, form } = $props();
 
-	/** @type {import('svelte/action').Action<HTMLInputElement, import('$lib/validation').Validation<unknown> | undefined>} */
+	/** @type {import('svelte/action').Action<HTMLInputElement | HTMLTextAreaElement, import('$lib/validation').Validation<unknown> | undefined>} */
 	function validate(input, validation) {
 		const { name } = input;
 		input.setCustomValidity(validation?.first(name)?.message ?? '');
@@ -24,7 +24,7 @@
 <h1>Create New Exercise</h1>
 
 {#if form?.validation}
-	<p class="validation">{form.validation.issues([])[0]?.message}</p>
+	<p class="validation">{form.validation.first([])?.message}</p>
 {:else if form}
 	<p>Success!</p>
 	<pre>{JSON.stringify(form.exercise, null, 2)}</pre>
@@ -40,21 +40,44 @@
 	/** @type {import('$lib/validation').Validation<unknown> | undefined} */
 	validation,
 	/** @type {string | undefined} */
-	help
+	help,
+	/** @type {'text' | 'password' | 'hidden' | 'textarea'} */
+	type = 'text'
 )}
+	{@const props = {
+		placeholder: '\u200B', // Weird Safari renering bug with baseline alignment
+		autocomplete: 'off',
+		autocapitalize: 'off',
+		spellcheck: 'false'
+	}}
 	<div class="control">
-		<label for={name}>{label}</label>
+		<label for={name}>{label}:</label>
 		<div class="contents">
-			<input
-				type="text"
-				{name}
-				{value}
-				placeholder={'\u200B'}
-				use:validate={validation}
-				aria-invalid={validation?.has('name')}
-				aria-errormessage={validation?.has('name') ? `${name}-error` : undefined}
-			/>
-			{#if help}<p class="helper">{help}</p>{/if}
+			{#if 'textarea' === type}
+				<textarea
+					id={name}
+					{name}
+					{value}
+					use:validate={validation}
+					aria-invalid={validation?.has(name)}
+					aria-errormessage={validation?.has(name) ? `${name}-error` : undefined}
+					aria-describedby="{name}-help"
+					{...props}
+				></textarea>
+			{:else}
+				<input
+					{type}
+					id={name}
+					{name}
+					{value}
+					use:validate={validation}
+					aria-invalid={validation?.has(name)}
+					aria-errormessage={validation?.has(name) ? `${name}-error` : undefined}
+					aria-describedby="{name}-help"
+					{...props}
+				/>
+			{/if}
+			{#if help}<p class="helper" id={`${name}-help`}>{help}</p>{/if}
 			{#if validation?.has(name)}
 				<p class="validation" id={`${name}-error`} aria-live="assertive">
 					{validation.first(name)?.message}
@@ -93,35 +116,24 @@
 		'The name of the exercise'
 	)}
 	{@render Control('label', form?.exercise.label, 'Label', form?.validation, 'The unique label')}
-	<!--
-	<div class="control">
-		<label for="name">Name</label>
-		<div class="contents">
-			<input type="text" name="name" value={form?.exercise.name} placeholder={'\u200B'} />
-			<p class="helper">The name of the exercise</p>
-			{#if form?.validation?.has('name')}
-				<p class="validation" id="name-error" aria-live="assertive">
-					{form?.validation.first('name')?.message}
-				</p>
-			{/if}
-		</div>
-	</div>
-	
-	<div class="control">
-		<label for="label">Label</label>
-		<input type="text" name="label" value={form?.exercise.label} />
-	</div>
-    -->
-	<div class="control">
-		<label for="description">Description</label>
-		<textarea name="description" placeholder={'\u200B'}>{form?.exercise.description}</textarea>
-	</div>
-
-	<div class="control">
-		<label for="instructions">Instructions:</label>
-		<textarea name="instructions" placeholder={'\u200B'}>{form?.exercise.instructions}</textarea>
-	</div>
-
+	{@render Control(
+		'description',
+		form?.exercise.description,
+		'Description',
+		form?.validation,
+		'A short summary',
+		'textarea'
+	)}
+	{@render Control(
+		'instructions',
+		Array.isArray(form?.exercise.instructions)
+			? form?.exercise.instructions.join('\n')
+			: form?.exercise.instructions,
+		'Instructions',
+		form?.validation,
+		'How to do the exercise',
+		'textarea'
+	)}
 	<div class="control">
 		<label for="alternatives">Alternatives:</label>
 		<ul>
