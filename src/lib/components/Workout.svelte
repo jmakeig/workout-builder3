@@ -13,7 +13,7 @@
 	 * Deep reactivity in the component. Changes won’t propogate to the parent.
 	 * @type {Array<PendingSet>}
 	 */
-	let sets = $state(workout.sets);
+	let sets = $derived(workout.sets);
 
 	/**
 	 * Returns an event handler that closes over the index, `s`.
