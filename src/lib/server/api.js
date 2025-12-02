@@ -1,5 +1,5 @@
 import { validate_exercise, validate_workout, new_id } from '$lib/entity-helpers';
-import { is_invalid } from '$lib/validation';
+import { is_invalid, Validation } from '$lib/validation';
 
 /** @typedef {import('$lib/entities').ID} ID */
 /** @typedef {import('$lib/entities').Exercise} Exercise */
@@ -65,6 +65,18 @@ export async function create_exercise(input) {
 
 	if (is_invalid(exercise)) {
 		return Promise.resolve({ exercise: input, validation: exercise.validation });
+	}
+
+	// Label uniqueness
+	// With a database you’d probably catch a unique constraint violation
+	if (exercises.find((ex) => ex.label === exercise.label)) {
+		return Promise.resolve({
+			exercise: input,
+			validation: /** @type {Validation<Exercise>} */ (new Validation()).add(
+				'Exercise label must be unique',
+				'label'
+			)
+		});
 	}
 
 	exercises.push(exercise);
