@@ -24,7 +24,11 @@
 <h1>Create New Exercise</h1>
 
 {#if form?.validation}
-	<p class="validation">{form.validation.first([])?.message}</p>
+	{#if form.validation.first([])}
+		<p class="validation">{form.validation.first([])?.message}</p>
+	{:else}
+		<p class="validation">Oops!</p>
+	{/if}
 {:else if form}
 	<p>Success!</p>
 	<pre>{JSON.stringify(form.exercise, null, 2)}</pre>
@@ -91,6 +95,7 @@
 	novalidate
 	method="post"
 	action="?/create"
+	class:invalid={form?.validation?.has()}
 	use:enhance={({ formData, cancel }) => {
 		const pending_exercise = {
 			...Object.fromEntries(formData),
@@ -136,9 +141,21 @@
 	)}
 	<div class="control">
 		<label for="alternatives">Alternatives:</label>
-		<ul>
-			<li><input type="checkbox" name="alternatives" value="push-up" /> Push-up</li>
-		</ul>
+		<div class="contents">
+			<ul>
+				{#each Object.entries(data.exercises) as [label, exercise]}
+					<li>
+						<input type="checkbox" name="alternatives" value={exercise.exercise} />
+						<a href={`/exercises/${label}`}>{exercise.name}</a>
+					</li>
+				{/each}
+			</ul>
+			{#if form?.validation?.has('alternatives')}
+				<p class="validation" id={`${'alternatives'}-error`} aria-live="assertive">
+					{form.validation.first('alternatives')?.message}
+				</p>
+			{/if}
+		</div>
 	</div>
 
 	<div class="control actions">
