@@ -1,4 +1,3 @@
-import type { AtLeastOne } from '$lib/util';
 import { Validation } from './validation.js';
 
 type Locale = 'en' | 'fr';

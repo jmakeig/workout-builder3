@@ -1,4 +1,3 @@
-import type { Loosen } from './util';
 import type { ID, Pending } from './entity-utils';
 
 /**
