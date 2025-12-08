@@ -1,13 +1,5 @@
 import type { Loosen } from './util';
-
-declare const IDBrand: unique symbol;
-/**
- * Need to remembrer to use a type assertion.
- * This is not a normal string.
- *
- * @example const id = @type {ID} ('string')
- */
-type ID = string & { [IDBrand]: void };
+import type { ID, Pending } from './entity-utils';
 
 /**
  * Top-level entity. A workout is made of of ordered sets.
@@ -42,9 +34,9 @@ export type Exercise = {
 
 type Rest = {};
 
-export type PendingWorkout = Loosen<Workout>;
-export type PendingExercise = Loosen<Exercise>;
-export type PendingRest = Loosen<Rest>;
+export type PendingWorkout = Pending<Workout>;
+export type PendingExercise = Pending<Exercise>;
+export type PendingRest = Pending<Rest>;
 export type PendingActivity = ({ exercise: PendingExercise } | { rest: PendingRest }) &
-	Loosen<{ duration: number; instructions: string }>;
+	Pending<{ duration: number; instructions: string }>;
 export type PendingSet = Array<PendingActivity>;

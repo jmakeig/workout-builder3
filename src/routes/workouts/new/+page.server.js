@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import * as api from '$lib/server/api';
 import { is_invalid } from '$lib/validation';
+import { from_entries } from '$lib/forms';
 
 /** @typedef {import('$lib/entities').Workout} Workout */
 /** @typedef {import('$lib/entities').PendingWorkout} PendingWorkout */
@@ -14,9 +15,7 @@ export async function load() {
 /** @satisfies {import('./$types').Actions} */
 export const actions = {
 	create: async ({ request }) => {
-		const workout_input = /** @type {PendingWorkout} */ (
-			Object.fromEntries(await request.formData())
-		);
+		const workout_input = /** @type {PendingWorkout} */ (from_entries(await request.formData()));
 
 		const workout = await api.create_workout(workout_input);
 

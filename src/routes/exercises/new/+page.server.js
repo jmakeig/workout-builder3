@@ -1,6 +1,7 @@
 import * as api from '$lib/server/api';
 import { fail } from '@sveltejs/kit';
 import { is_invalid } from '$lib/validation';
+import { from_entries } from '$lib/forms';
 
 /** @typedef {import('$lib/entities').Exercise} Exercise */
 /** @typedef {import('$lib/entities').PendingExercise} PendingExercise */
@@ -12,34 +13,12 @@ export async function load() {
 	};
 }
 
-/**
- *
- * @param {FormData} form_data
- * @reutrn {Record<string, unknown>}
- */
-function from_entries(form_data) {
-	/** @type {Record<string, unknown>} */
-	const out = {};
-	for (const [key, value] of form_data.entries()) {
-		if (out.hasOwnProperty(key)) {
-			if (Array.isArray(out[key])) {
-				out[key].push(value);
-			} else {
-				out[key] = [out[key], value];
-			}
-		} else {
-			out[key] = value;
-		}
-	}
-	return out;
-}
-
 /** @satisfies {import('./$types').Actions} */
 export const actions = {
 	create: async ({ request }) => {
 		const input =
 			/** @type {PendingExercise} */
-			(Object.fromEntries(await request.formData()));
+			(from_entries(await request.formData()));
 		input.alternatives = console.warn('exercise.alternatives not yet implemented') ?? null;
 		const exercise = await api.create_exercise(input);
 

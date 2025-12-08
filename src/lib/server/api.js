@@ -1,7 +1,7 @@
 import { validate_exercise, validate_workout, new_id } from '$lib/entity-helpers';
 import { is_invalid, Validation } from '$lib/validation';
 
-/** @typedef {import('$lib/entities').ID} ID */
+/** @typedef {import('$lib/entity-utils').ID} ID */
 /** @typedef {import('$lib/entities').Exercise} Exercise */
 /** @typedef {import('$lib/entities').PendingExercise} PendingExercise */
 /** @typedef {import('$lib/entities').Workout} Workout */

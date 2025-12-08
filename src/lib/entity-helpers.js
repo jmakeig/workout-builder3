@@ -1,5 +1,5 @@
 /**
- * @typedef {import('$lib/entities').ID} ID
+ * @typedef {import('$lib/entity-utils').ID} ID
  * @typedef {import('$lib/entities').Workout} Workout
  * @typedef {import('$lib/entities').PendingWorkout} PendingWorkout
  * @typedef {import('$lib/entities').Set} Set
