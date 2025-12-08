@@ -19,9 +19,9 @@ type Ref<Entity> = {
  */
 type IDPropertyKey<Entity> = {
 	[K in keyof Entity]: Entity[K] extends ID
-		? [ID] extends [Entity[K]]
+		? [ID] extends [Entity[K]] // Clever exact match trick
 			? K
-			: never // Clever exact match trick
+			: never
 		: never;
 }[keyof Entity];
 
@@ -82,12 +82,9 @@ export type Pending<Entity> =
 		: {
 				[K in keyof Entity]: K extends IDPropertyKey<Entity> // Rule 1: Primary ID property
 					? ID | null
-					: // Rule 4: Array properties (must be second)
-						Entity[K] extends Array<any>
+					: Entity[K] extends Array<any>
 						? TransformArray<Entity[K]>
-						: // Rule 2: Primitive handling
-							Entity[K] extends Primitive // Numbers become number | null
+						: Entity[K] extends Primitive
 							? Entity[K] | string | null
-							: // Rule 3 (and final fall-through): Entity/Object reference transformation
-								TransformForeignRef<Entity[K]>;
+							: TransformForeignRef<Entity[K]>;
 			};
