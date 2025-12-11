@@ -182,19 +182,31 @@ export function validate_pending_exercise(pending) {
 
 	// Existence
 	if ('object' === typeof pending && null !== pending) {
+		if ('exercise' in pending) {
+			if (null === pending.exercise || 'string' === typeof pending.exercise) {
+				// OK
+				exercise.exercise = pending.exercise;
+			} else {
+				validation.add('Exercise must have an identifier.', 'exercise');
+			}
+		} else {
+			validation.add('Exercise must have an identifier.', 'exercise');
+		}
+		let is_valid_name = false;
 		if ('name' in pending && 'string' === typeof pending.name) {
-			if (pending.name.length < 3) {
+			if (pending.name.trim().length < 3) {
 				validation.add('Name must at least 3 letters.', 'name');
 			} else {
-				exercise.name = pending.name.trim();
+				is_valid_name = true;
 			}
+			exercise.name = pending.name.trim();
 		} else {
 			validation.add('Name must be text.', 'name');
 		}
 		if ('label' in pending) {
 			if (null === pending.label || '' === pending.label) {
-				if (null !== exercise.name) exercise.label = slug(exercise.name);
-				else validation.add('Label depends on a valid name');
+				if (is_valid_name && null !== exercise.name) exercise.label = slug(exercise.name);
+				else validation.add('Label depends on a valid name', 'label');
 			} else if ('string' === typeof pending.label) {
 				if (pending.label.length < 3) {
 					validation.add('Label must at least 3 letters.', 'label');
@@ -261,8 +273,8 @@ export function validate_pending_exercise(pending) {
 					// ]);
 					pending.alternatives.forEach((alt, a) => {
 						if ('object' === typeof alt && null !== alt) {
-							if ('ref' in alt && 'string' === typeof alt.ref) {
-								if (alt.ref.length < 1) {
+							if ('exercise' in alt && 'string' === typeof alt.exercise) {
+								if (alt.exercise.length < 1) {
 									validation.add('Alternative exercise reference must not be empty.', [
 										'alternatives',
 										a
@@ -270,7 +282,7 @@ export function validate_pending_exercise(pending) {
 								} else {
 									if (null !== exercise.alternatives)
 										exercise.alternatives[a] = {
-											exercise: /** @type {ID} */ (alt.ref.trim())
+											exercise: /** @type {ID} */ (alt.exercise.trim())
 										};
 								}
 							} else {
