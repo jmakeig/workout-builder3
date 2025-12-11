@@ -1,6 +1,6 @@
 <script>
 	import { enhance, applyAction } from '$app/forms';
-	import { validate_exercise } from '$lib/entity-helpers';
+	import { validate_pending_exercise } from '$lib/entity-helpers';
 	import { is_invalid } from '$lib/validation';
 	/** @type {{ data: import('./$types').PageData, form: import('./$types').ActionData }} */
 	let { data, form } = $props();
@@ -19,6 +19,14 @@
 			}
 		};
 	}
+
+	/**
+	 * @template Entity
+	 * @typedef {import('$lib/entity-utils').Pending<Entity>} Pending
+	 */
+	/**
+	 * @typedef {import('$lib/entities').Exercise} Exercise
+	 */
 </script>
 
 <h1>Create New Exercise</h1>
@@ -97,11 +105,11 @@
 	action="?/create"
 	class:invalid={form?.validation?.has()}
 	use:enhance={({ formData, cancel }) => {
-		const pending_exercise = {
+		const pending_exercise = /** @type {Pending<Exercise>} */ ({
 			...Object.fromEntries(formData),
 			alternatives: console.warn('Exercise.alternatives is not implemented') ?? null
-		};
-		const exercise = validate_exercise(pending_exercise);
+		});
+		const exercise = validate_pending_exercise(pending_exercise);
 		if (is_invalid(exercise)) {
 			applyAction({
 				type: 'failure',

@@ -16,10 +16,23 @@ export async function load() {
 /** @satisfies {import('./$types').Actions} */
 export const actions = {
 	create: async ({ request }) => {
-		const input =
-			/** @type {PendingExercise} */
-			(from_entries(await request.formData()));
-		input.alternatives = console.warn('exercise.alternatives not yet implemented') ?? null;
+		const data = await request.formData();
+		const input = /** @type {PendingExercise} */ ({
+			exercise: null,
+			name: data.get('name'),
+			label: data.get('label'),
+			description: data.get('description'),
+			instructions: data.get('instructions'),
+			alternatives: data
+				.getAll('alternatives[]')
+				// asdf
+				.map((alternative) => ({
+					exercise: alternative
+				}))
+		});
+
+		console.log('Pending<Exercise>', input);
+		// input.alternatives = console.warn('exercise.alternatives not yet implemented') ?? null;
 		const exercise = await api.create_exercise(input);
 
 		// Careful with the params. The message sent back in the `form` or the `fail`

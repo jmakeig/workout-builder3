@@ -1,11 +1,18 @@
-import { validate_exercise, validate_workout, new_id } from '$lib/entity-helpers';
+import { validate_pending_exercise, validate_workout, new_id } from '$lib/entity-helpers';
 import { is_invalid, Validation } from '$lib/validation';
 
-/** @typedef {import('$lib/entity-utils').ID} ID */
-/** @typedef {import('$lib/entities').Exercise} Exercise */
-/** @typedef {import('$lib/entities').PendingExercise} PendingExercise */
-/** @typedef {import('$lib/entities').Workout} Workout */
-/** @typedef {import('$lib/entities').PendingWorkout} PendingWorkout */
+/**
+ * @template Entity
+ * @typedef {import('$lib/entity-utils').Pending<Entity>} Pending
+ */
+/**
+ * @typedef {import('$lib/entity-utils').ID} ID
+ * @typedef {import('$lib/entities').Workout} Workout
+ * @typedef {import('$lib/entities').PendingWorkout} PendingWorkout
+ * @typedef {import('$lib/entities').Set} Set
+ * @typedef {import('$lib/entities').Activity} Activity
+ * @typedef {import('$lib/entities').Exercise} Exercise
+ */
 
 /**
  * @template In, Out
@@ -57,11 +64,11 @@ function delay(value, ms) {
 
 /**
  *
- * @param {PendingExercise} input
- * @returns {Promise<MaybeInvalid<PendingExercise, Exercise, 'exercise'>>}
+ * @param {Pending<Exercise>} input
+ * @returns {Promise<MaybeInvalid<Pending<Exercise>, Exercise, 'exercise'>>}
  */
 export async function create_exercise(input) {
-	const exercise = validate_exercise({ ...input, exercise: new_id() });
+	const exercise = validate_pending_exercise({ ...input, exercise: new_id() });
 
 	if (is_invalid(exercise)) {
 		return Promise.resolve({ exercise: input, validation: exercise.validation });

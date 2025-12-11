@@ -53,8 +53,9 @@ type IsEntity<Entity> =
 /**
  * Applies the `Ref` mapping logic to each element of an `Array`
  */
-type TransformArray<T> =
-	T extends Array<infer U>
+type TransformArray<T> = T extends Array<string> | null
+	? Array<string> | null | string
+	: T extends Array<infer U>
 		? Array<U extends object ? (IsEntity<U> extends true ? Ref<U> | null : Pending<U>) : U>
 		: T;
 
@@ -80,7 +81,7 @@ export type Pending<Entity> =
 	Entity extends Array<any>
 		? TransformArray<Entity>
 		: {
-				[K in keyof Entity]: K extends IDPropertyKey<Entity> // Rule 1: Primary ID property
+				[K in keyof Entity]: K extends IDPropertyKey<Entity>
 					? ID | null
 					: Entity[K] extends Array<any>
 						? TransformArray<Entity[K]>

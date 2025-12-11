@@ -1,4 +1,8 @@
 /**
+ * @template Entity
+ * @typedef {import('$lib/entity-utils').Pending<Entity>} Pending
+ */
+/**
  * @typedef {import('$lib/entity-utils').ID} ID
  * @typedef {import('$lib/entities').Workout} Workout
  * @typedef {import('$lib/entities').PendingWorkout} PendingWorkout
@@ -131,7 +135,7 @@ export function validate_activity(value) {
 	if ('object' === typeof activity && null !== activity) {
 		if ('exercise' in activity || 'rest' in activity) {
 			if ('exercise' in activity) {
-				const exercise = validate_exercise(activity.exercise);
+				const exercise = OLD_validate_exercise(activity.exercise);
 				if (is_invalid(exercise)) {
 					validation.merge(exercise.validation, ['exercise']);
 				} else {
@@ -167,10 +171,136 @@ export function validate_activity(value) {
 }
 
 /**
+ * @param {Pending<Exercise>} pending
+ * @returns {MaybeInvalid<Pending<Exercise>, Exercise, 'exercise'>}
+ */
+export function validate_pending_exercise(pending) {
+	/** @type {Validation<Exercise>} */
+	const validation = new Validation();
+	/** @type {Pending<Exercise>} */
+	const exercise = {};
+
+	// Existence
+	if ('object' === typeof pending && null !== pending) {
+		if ('name' in pending && 'string' === typeof pending.name) {
+			if (pending.name.length < 3) {
+				validation.add('Name must at least 3 letters.', 'name');
+			} else {
+				exercise.name = pending.name.trim();
+			}
+		} else {
+			validation.add('Name must be text.', 'name');
+		}
+		if ('label' in pending) {
+			if (null === pending.label || '' === pending.label) {
+				if (null !== exercise.name) exercise.label = slug(exercise.name);
+				else validation.add('Label depends on a valid name');
+			} else if ('string' === typeof pending.label) {
+				if (pending.label.length < 3) {
+					validation.add('Label must at least 3 letters.', 'label');
+				} else {
+					if ('new' === pending.label.toLowerCase()) {
+						validation.add('Label cannot be “new”.', 'label');
+					} else {
+						exercise.label = pending.label.trim();
+					}
+				}
+			} else {
+				validation.add('Label must be text.');
+			}
+		} else {
+			validation.add('Label must exist.', 'label');
+		}
+		// Property type
+		if ('description' in pending) {
+			if (null === pending.description || '' === pending.description) {
+				// OK
+				exercise.description = null;
+			} else if ('string' === typeof pending.description) {
+				// OK
+				exercise.description = pending.description.trim();
+			} else {
+				validation.add('Exercise description invalid', 'description');
+			}
+		} else {
+			validation.add('Exercise description invalid', 'description');
+		}
+		if ('instructions' in pending) {
+			if (null === pending.instructions || '' === pending.instructions) {
+				exercise.instructions = null;
+			} else {
+				if ('string' === typeof pending.instructions) {
+					// Parse and fall through
+					exercise.instructions = pending.instructions.trim().split('\n');
+				}
+				if (Array.isArray(exercise.instructions)) {
+					for (let i = 0; i < exercise.instructions.length; i++) {
+						if ('string' === typeof exercise.instructions[i]) {
+							exercise.instructions[i] = exercise.instructions[i].trim();
+						} else {
+							validation.add('Exercise instruction must be text.', ['instructions', i]);
+						}
+					}
+				} else {
+					validation.add('Exercise instructions must exist.', 'instructions');
+				}
+			}
+		} else {
+			validation.add('Exercise instructions must exist.', 'instructions');
+		}
+		if ('alternatives' in pending) {
+			if (null === pending.alternatives) {
+				// OK
+				exercise.alternatives = null;
+			} else {
+				exercise.alternatives = [];
+				if (Array.isArray(pending.alternatives)) {
+					exercise.alternatives = [];
+					// exercise.alternatives = validation.collect(exercise.alternatives, validate_exercise, [
+					// 	'alternatives'
+					// ]);
+					pending.alternatives.forEach((alt, a) => {
+						if ('object' === typeof alt && null !== alt) {
+							if ('ref' in alt && 'string' === typeof alt.ref) {
+								if (alt.ref.length < 1) {
+									validation.add('Alternative exercise reference must not be empty.', [
+										'alternatives',
+										a
+									]);
+								} else {
+									if (null !== exercise.alternatives)
+										exercise.alternatives[a] = {
+											exercise: /** @type {ID} */ (alt.ref.trim())
+										};
+								}
+							} else {
+								validation.add('Alternative exercise must be a reference.', ['alternatives', a]);
+							}
+						}
+					});
+				} else {
+					validation.add('Alternatives can only be exercises.', 'alternatives');
+				}
+			}
+		} else {
+			validation.add('Exercise alternatives must exist.', 'alternatives');
+		}
+	} else {
+		validation.add('Exercise must exist.');
+	}
+
+	if (validation.is_valid()) return /** @type {Exercise} */ (exercise);
+	return {
+		exercise: pending,
+		validation
+	};
+}
+
+/**
  * @param {unknown} value Probably a PendingExercise
  * @returns {MaybeInvalid<unknown, Exercise, 'exercise'>}
  */
-export function validate_exercise(value) {
+function OLD_validate_exercise(value) {
 	/** @type {Validation<Exercise>} */
 	const validation = new Validation();
 	const exercise = structuredClone(value);
@@ -256,7 +386,7 @@ export function validate_exercise(value) {
 				exercise.alternatives = null;
 			} else {
 				if (Array.isArray(exercise.alternatives)) {
-					exercise.alternatives = validation.collect(exercise.alternatives, validate_exercise, [
+					exercise.alternatives = validation.collect(exercise.alternatives, OLD_validate_exercise, [
 						'alternatives'
 					]);
 				} else {

@@ -61,6 +61,32 @@ All data access goes through an API library, `$lib/server/api.js`. The API is re
 
 Enforcing business rules, such as validating user inputs or handling database constraint violations, are communicated as part of an API’s return types. An `InvalidResult` type return provides a standard way for a function to return the user input and a collection of one or more validation errors. APIs should only throw (or bubble) exceptions for unexpected states that the user cannot fix themselves by submitting different data. For example, an empty value for a required property is a validation error, not an exceptional case. The user should resubmit with a different value. A dropped database connection, on the other hand, is an error state that the user can’t do anything about.
 
+```mermaid
+sequenceDiagram
+    participant UI
+    participant Action
+    participant API
+    participant DB
+    box Browser
+        participant UI
+    end
+    box Server
+        participant Action
+        participant API
+    end
+    box Persistence
+        participant DB
+    end
+
+
+    UI->>+Action: FormData
+    Action->>+API: Pending<Entity>
+    API->>+DB: SQL
+    DB->>-API: JSON as Entity
+    API->>-Action: MaybeInvalid<Entity>
+    Action->>-UI: MaybeInvalid<Entity>
+```
+
 <figure>
     <figcaption>Example API function, <a href="https://github.com/jmakeig/workout-builder3/blob/main/src/lib/server/api.js"><code>$lib/server/api.js</code></a></figcaption>
 
