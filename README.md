@@ -148,3 +148,64 @@ export const actions = {
 1. Marshall a `Pending` entity from the submitted `FormData`. More complex objects or form abstractions might need specific mapping logic. The type assertion is a little heavy handed. However, `FormData` is difficult to correctly tpye.
 2. Uses the API to turn the `Pending` entity into its stongly typed instance.
 3. Validation failures use SvelteKit’s `fail()` response to convey an HTTP `400` error that’s available to the page in the `form` property of `$props()`. Validation errors get passed through the `fail()` `Response` and are available as `form?.validations` in the front-end. Exceptions return a `500` `error()`. Generally errors should be allowed to bubble and handled at the closest parent [error boundary](https://joyofcode.xyz/catch-errors-during-rendering-with-svelte-error-boundaries).
+
+## Form
+
+```svelte
+{#snippet Control(
+	/** @type {string} */
+	name,
+	/** @type {string | number | boolean | object & {toString: function}| null | undefined } */
+	value,
+	/** @type {string} */
+	label = name,
+	/** @type {import('$lib/validation').Validation<unknown> | undefined} */
+	validation,
+	/** @type {string | undefined} */
+	help,
+	/** @type {'text' | 'password' | 'hidden' | 'textarea'} */
+	type = 'text'
+)}
+	{@const props = {
+		placeholder: '\u200B', // Weird Safari renering bug with baseline alignment
+		autocomplete: 'off',
+		autocapitalize: 'off',
+		spellcheck: 'false'
+	}}
+	<div class="control">
+		<label for={name}>{label}:</label>
+		<div class="contents">
+			{#if 'textarea' === type}
+				<textarea
+					id={name}
+					{name}
+					{value}
+					use:validate={validation}
+					aria-invalid={validation?.has(name)}
+					aria-errormessage={validation?.has(name) ? `${name}-error` : undefined}
+					aria-describedby="{name}-help"
+					{...props}
+				></textarea>
+			{:else}
+				<input
+					{type}
+					id={name}
+					{name}
+					{value}
+					use:validate={validation}
+					aria-invalid={validation?.has(name)}
+					aria-errormessage={validation?.has(name) ? `${name}-error` : undefined}
+					aria-describedby="{name}-help"
+					{...props}
+				/>
+			{/if}
+			{#if help}<p class="helper" id={`${name}-help`}>{help}</p>{/if}
+			{#if validation?.has(name)}
+				<p class="validation" id={`${name}-error`} aria-live="assertive">
+					{validation.first(name)?.message}
+				</p>
+			{/if}
+		</div>
+	</div>
+{/snippet}
+```
