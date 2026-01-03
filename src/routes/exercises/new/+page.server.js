@@ -31,8 +31,7 @@ export const actions = {
 				}))
 		});
 
-		console.log('Pending<Exercise>', input);
-		// input.alternatives = console.warn('exercise.alternatives not yet implemented') ?? null;
+		// console.log('Pending<Exercise>', input);
 		const exercise = await api.create_exercise(input);
 
 		// Careful with the params. The message sent back in the `form` or the `fail`

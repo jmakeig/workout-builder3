@@ -1,4 +1,5 @@
 <script>
+	import Control from '$lib/components/Control.svelte';
 	import { enhance, applyAction } from '$app/forms';
 	import { validate_pending_exercise } from '$lib/entity-helpers';
 	import { is_invalid } from '$lib/validation';
@@ -42,63 +43,6 @@
 	<pre>{JSON.stringify(form.exercise, null, 2)}</pre>
 {/if}
 
-{#snippet Control(
-	/** @type {string} */
-	name,
-	/** @type {string | number | boolean | object & {toString: function}| null | undefined } */
-	value,
-	/** @type {string} */
-	label = name,
-	/** @type {import('$lib/validation').Validation<unknown> | undefined} */
-	validation,
-	/** @type {string | undefined} */
-	help,
-	/** @type {'text' | 'password' | 'hidden' | 'textarea'} */
-	type = 'text'
-)}
-	{@const props = {
-		placeholder: '\u200B', // Weird Safari renering bug with baseline alignment
-		autocomplete: 'off',
-		autocapitalize: 'off',
-		spellcheck: 'false'
-	}}
-	<div class="control">
-		<label for={name}>{label}:</label>
-		<div class="contents">
-			{#if 'textarea' === type}
-				<textarea
-					id={name}
-					{name}
-					{value}
-					use:validate={validation}
-					aria-invalid={validation?.has(name)}
-					aria-errormessage={validation?.has(name) ? `${name}-error` : undefined}
-					aria-describedby="{name}-help"
-					{...props}
-				></textarea>
-			{:else}
-				<input
-					{type}
-					id={name}
-					{name}
-					{value}
-					use:validate={validation}
-					aria-invalid={validation?.has(name)}
-					aria-errormessage={validation?.has(name) ? `${name}-error` : undefined}
-					aria-describedby="{name}-help"
-					{...props}
-				/>
-			{/if}
-			{#if help}<p class="helper" id={`${name}-help`}>{help}</p>{/if}
-			{#if validation?.has(name)}
-				<p class="validation" id={`${name}-error`} aria-live="assertive">
-					{validation.first(name)?.message}
-				</p>
-			{/if}
-		</div>
-	</div>
-{/snippet}
-
 <form
 	novalidate
 	method="post"
@@ -122,32 +66,43 @@
 		return; // Inherit default update behavior
 	}}
 >
-	{@render Control(
-		'name',
-		form?.exercise.name,
-		'Name',
-		form?.validation,
-		'The name of the exercise'
-	)}
-	{@render Control('label', form?.exercise.label, 'Label', form?.validation, 'The unique label')}
-	{@render Control(
-		'description',
-		form?.exercise.description,
-		'Description',
-		form?.validation,
-		'A short summary',
-		'textarea'
-	)}
-	{@render Control(
-		'instructions',
-		Array.isArray(form?.exercise.instructions)
+	<Control
+		name="name"
+		value={form?.exercise.name}
+		label="Name"
+		validation={form?.validation}
+		help="The name of the exercise"
+	/>
+	<Control
+		name="label"
+		value={form?.exercise.label}
+		label="Label"
+		validation={form?.validation}
+		help="The unique label"
+	/>
+	<Control
+		name="description"
+		value={form?.exercise.description}
+		label="Description"
+		validation={form?.validation}
+		help="A short summary"
+	>
+		{#snippet input(provided)}
+			<textarea {...provided}></textarea>
+		{/snippet}
+	</Control>
+	<Control
+		name="instructions"
+		value={Array.isArray(form?.exercise.instructions)
 			? form?.exercise.instructions.join('\n')
-			: form?.exercise.instructions,
-		'Instructions',
-		form?.validation,
-		'How to do the exercise',
-		'textarea'
-	)}
+			: form?.exercise.instructions}
+		validation={form?.validation}
+		help="How to do the exercise"
+	>
+		{#snippet input(provided)}
+			<textarea {...provided}></textarea>
+		{/snippet}
+	</Control>
 	<div class="control">
 		<label for="alternatives">Alternatives:</label>
 		<div class="contents">
