@@ -107,6 +107,7 @@
 	use:enhance={({ formData, cancel }) => {
 		const pending_exercise = /** @type {Pending<Exercise>} */ ({
 			...Object.fromEntries(formData),
+			exercise: null, // Indicates that it’s new
 			alternatives: console.warn('Exercise.alternatives is not implemented') ?? null
 		});
 		const exercise = validate_pending_exercise(pending_exercise);
